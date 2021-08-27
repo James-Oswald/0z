@@ -1,0 +1,10 @@
+{
+    "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools",
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "\\d\\program\\0z\\bin",
+            "binaryPath": "\\d\\program\\0z\\bin\\main.exe",
+            "binaryArgs": []
+        }
+    ]
+}
