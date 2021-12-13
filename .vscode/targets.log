@@ -7,12 +7,11 @@ make.exe all --print-data-base --no-builtin-variables --no-builtin-rules --quest
 # There is NO WARRANTY, to the extent permitted by law.
  
 
-# Make data base, printed on Thu Aug 26 12:06:24 2021
+# Make data base, printed on Mon Dec 13 16:55:33 2021
 
 # Variables
 
-# environment
-FPS_BROWSER_APP_PROFILE_STRING = Internet Explorer
+ 
 # environment
 SYSTEMDRIVE = C:
 # environment
@@ -20,15 +19,19 @@ JAVA_HOME = D:\Programming\JavaVersions\jdk-15.0.2\bin
 # environment
 LC_ALL = C
 # environment
+_MSYS2_BASH = C:\msys64\usr\bin\bash.exe
+# environment
+OZEMACS = D:\Software\Mozart\opt\bin\runemacs.exe
+# environment
 OCULUSBASE = D:\Oculus\
 # environment
 USERPROFILE = C:\Users\James
 # environment
-VBOX_MSI_INSTALL_PATH = C:\Program Files\Oracle\VirtualBox\
+VBOX_MSI_INSTALL_PATH = D:\Programming\VBox\
 # environment
 LOCALAPPDATA = C:\Users\James\AppData\Local
 # environment
-VSCODE_IPC_HOOK_EXTHOST = \\.\pipe\vscode-ipc-c30762d3-5313-40d9-b64d-3ebac0c56afa-sock
+VSCODE_IPC_HOOK_EXTHOST = \\.\pipe\vscode-ipc-ff572a88-6101-463a-95f4-c3219a89faf1-sock
 # environment
 VSCODE_CWD = C:\Users\James\AppData\Local\Programs\Microsoft VS Code
 # environment
@@ -44,11 +47,7 @@ MAKE_COMMAND := make
 # automatic
 @D = $(patsubst %/,%,$(dir $@))
 # environment
-CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_6840_GHZVDIABPIMFIHWC
-# environment
-VSCODE_BROWSER_CODE_LOADING = bypassHeatCheck
-# environment
-FPS_BROWSER_USER_PROFILE_STRING = Default
+CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_3720_WUGJIBBKGNUDCIMK
 # environment
 VSCODE_HANDLES_UNCAUGHT_ERRORS = true
 # default
@@ -62,7 +61,7 @@ VSCODE_LOG_STACK = false
 # automatic
 %F = $(notdir $%)
 # environment
-VSCODE_CODE_CACHE_PATH = C:\Users\James\AppData\Roaming\Code\CachedData\3866c3553be8b268c8a7f8c0482c0c0177aa8bfa
+VSCODE_CODE_CACHE_PATH = C:\Users\James\AppData\Roaming\Code\CachedData\7db1a2b88f7557e0a43fec75b6ba7e50b3e9f77e
 # environment
 LANG = C
 # default
@@ -100,7 +99,7 @@ MAKEFILE_LIST := makefile
 # environment
 VSCODE_VERBOSE_LOGGING = true
 # environment
-VSCODE_PID = 6840
+VSCODE_PID = 3720
 # environment
 CLION = D:\CLion\bin;
 # automatic
@@ -122,6 +121,7 @@ EXE4J_JAVA_HOME = D:\Programming\JavaVersions\jdk-15.0.2\bin
 # environment
 HOMEPATH = \Users\James
 # default
+ 
 MAKECMDGOALS := all
 # environment
 DRIVERDATA = C:\Windows\System32\Drivers\DriverData
@@ -134,17 +134,21 @@ MAKELEVEL := 0
 # default
 MAKE = $(MAKE_COMMAND)
 # environment
-PATH = /c/Program Files/Common Files/Oracle/Java/javapath:/d/Software/miniconda3/condabin:/c/Program Files (x86)/Razer/ChromaBroadcast/bin:/c/Program Files/Razer/ChromaBroadcast/bin:/d/Oculus/Support/oculus-runtime:/c/Program Files (x86)/Razer Chroma SDK/bin:/c/Program Files/Razer Chroma SDK/bin:/c/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v9.0/bin:/c/Program Files (x86)/NVIDIA Corporation/PhysX/Common:/c/Windows/system32:/c/Windows:/c/Windows/System32/Wbem:/c/Windows/System32/WindowsPowerShell/v1.0:/c/Windows/System32/OpenSSH:/c/Program Files/PuTTY:/d/Matlab/bin:/c/Program Files/dotnet:/c/Program Files/Microsoft SQL Server/130/Tools/Binn:/c/Program Files (x86)/GnuWin32/bin:/c/WINDOWS/system32:/c/WINDOWS:/d/Software/Python/Python38:/c/WINDOWS/System32/Wbem:/c/WINDOWS/System32/WindowsPowerShell/v1.0:/c/WINDOWS/System32/OpenSSH:/mingw64/bin:/usr/bin:/c/Users/James/AppData/Roaming/npm:/c/Users/James/Desktop/tools/apache-maven-3.6.0/bin:/c/Users/James/AppData/Local/Programs/Microsoft VS Code/bin:/d/Racket:/d/Programming/gvim82/vim/vim82:/clang64/bin:/c/Program Files/nodejs:/c/ProgramData/chocolatey/bin:/c/Users/James/AppData/Local/Programs/Python/Python37-32:/d/Programming/emcc/emsdk/upstream/emscripten:/d/Programming/PHP:/d/Programming/Maven/apache-maven-3.6.3/bin:/c/Program Files/Git/cmd:/d/Software/MikTex/miktex/bin/x64:/c/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.1/include:/c/WINDOWS/system32:/c/WINDOWS:/c/WINDOWS/System32/Wbem:/c/WINDOWS/System32/WindowsPowerShell/v1.0:/c/WINDOWS/System32/OpenSSH:/d/Programming/APL/Dylog:/d/Software/Python/Python38:/d/Software/Python/Python38/Scripts:/d/Programming/JavaVersions/jdk-15.0.2/bin:/c/Users/James/Desktop/tools/apache-maven-3.6.0/bin:/c/Program Files (x86)/GnuWin32/bin:/c/Users/James/AppData/Local/Programs/Microsoft VS Code/bin:/d/Racket:/d/Programming/gvim82/vim/vim82:/clang64/bin:/c/Users/James/AppData/Roaming/npm:/d/Programming/PHP:/d/Programming/Maven/apache-maven-3.6.3/bin:/c/Users/James/AppData/Local/Microsoft/WindowsApps:/d/Programming/APL/Dylog:/c/Program Files/NVIDIA Corporation/NVSMI
+PATH = /c/Program Files/Common Files/Oracle/Java/javapath:/d/Software/miniconda3/condabin:/c/Program Files (x86)/Razer/ChromaBroadcast/bin:/c/Program Files/Razer/ChromaBroadcast/bin:/d/Oculus/Support/oculus-runtime:/c/Program Files (x86)/Razer Chroma SDK/bin:/c/Program Files/Razer Chroma SDK/bin:/c/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v9.0/bin:/c/Program Files (x86)/NVIDIA Corporation/PhysX/Common:/c/Windows/system32:/c/Windows:/c/Windows/System32/Wbem:/c/Windows/System32/WindowsPowerShell/v1.0:/c/Windows/System32/OpenSSH:/c/Program Files/PuTTY:/d/Matlab/bin:/c/Program Files/dotnet:/c/Program Files/Microsoft SQL Server/130/Tools/Binn:/c/Program Files (x86)/GnuWin32/bin:/c/WINDOWS/system32:/c/WINDOWS:/d/Software/Python/Python38:/c/WINDOWS/System32/Wbem:/c/WINDOWS/System32/WindowsPowerShell/v1.0:/c/WINDOWS/System32/OpenSSH:/mingw64/bin:/usr/bin:/c/Users/James/AppData/Roaming/npm:/c/Users/James/Desktop/tools/apache-maven-3.6.0/bin:/c/Users/James/AppData/Local/Programs/Microsoft VS Code/bin:/d/Racket:/d/Programming/gvim82/vim/vim82:/clang64/bin:/c/Program Files/nodejs:/c/ProgramData/chocolatey/bin:/c/Users/James/AppData/Local/Programs/Python/Python37-32:/d/Programming/emcc/emsdk/upstream/emscripten:/d/Programming/PHP:/d/Programming/Maven/apache-maven-3.6.3/bin:/c/Program Files/Git/cmd:/d/Software/MikTex/miktex/bin/x64:/c/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.1/include:/c/WINDOWS/system32:/c/WINDOWS:/c/WINDOWS/System32/Wbem:/c/WINDOWS/System32/WindowsPowerShell/v1.0:/c/WINDOWS/System32/OpenSSH:/d/Programming/APL/Dylog:/d/Programming/erl-24.1/bin:/d/Programming/Mozart1/bin:/d/Software/swipl/bin:/c/Users/James/AppData/Roaming/local/bin:/c/Users/James/.elan/bin:/d/Software/Python/Python38:/d/Software/Python/Python38/Scripts:/d/Programming/JavaVersions/jdk-15.0.2/bin:/c/Users/James/Desktop/tools/apache-maven-3.6.0/bin:/c/Program Files (x86)/GnuWin32/bin:/c/Users/James/AppData/Local/Programs/Microsoft VS Code/bin:/d/Racket:/d/Programming/gvim82/vim/vim82:/clang64/bin:/c/Users/James/AppData/Roaming/npm:/d/Programming/PHP:/d/Programming/Maven/apache-maven-3.6.3/bin:/c/Users/James/AppData/Local/Microsoft/WindowsApps:/d/Programming/APL/Dylog:/c/Program Files/NVIDIA Corporation/NVSMI:/c/Users/James/AppData/Roaming/cabal/bin:/c/tools/ghc-9.0.1/bin:/c/tools/msys64
 # environment
 COMPUTERNAME = JAMESOSWALDPC
 # default
 MAKEFILES := 
+# environment
+OZHOME = D:\Programming\Mozart1\
 # automatic
 ^F = $(notdir $^)
 # environment
+_MSYS2_PREFIX = x86_64
+# environment
 PROMPT = $P$G
 # environment
-CHOCOLATEYLASTPATHUPDATE = 132302339108641502
+CHOCOLATEYLASTPATHUPDATE = 132762939944012925
 # environment
 LOGONSERVER = \\JAMESOSWALDPC
 # environment
@@ -171,9 +175,6 @@ GNUMAKEFLAGS :=
 OS = Windows_NT
 # environment
 MAGICK_HOME = C:\msys64\mingw64\lib\ImageMagick-7.0.9\modules-Q16HDRI\coders
- 
-# environment
-__COMPAT_LAYER = DetectorsAppHealth
 # makefile
 .DEFAULT_GOAL := all
 # default
@@ -195,6 +196,8 @@ HOMEDRIVE = C:
 # environment
 PROCESSOR_ARCHITECTURE = AMD64
 # environment
+STACK_ROOT = C:\sr
+# environment
 VSCODE_AMD_ENTRYPOINT = vs/workbench/services/extensions/node/extensionHostProcess
 # environment
 HOME = /home/James
@@ -205,7 +208,7 @@ ELECTRON_RUN_AS_NODE = 1
 # environment
 TEMP = /c/Users/James/AppData/Local/Temp
 # environment
-VSCODE_IPC_HOOK = \\.\pipe\e7ca4567f3c0e5773e950c3eb9ce4dc1-1.59.1-main-sock
+VSCODE_IPC_HOOK = \\.\pipe\e7ca4567f3c0e5773e950c3eb9ce4dc1-1.63.0-main-sock
 # environment
 TERM = cygwin
 # default
@@ -216,6 +219,7 @@ TERM = cygwin
 SUFFIXES := 
 # environment
 ALLUSERSPROFILE = C:\ProgramData
+ 
 # environment
 SESSIONNAME = Console
 # default
@@ -223,9 +227,11 @@ SESSIONNAME = Console
 # environment
 PROCESSOR_REVISION = 9e0a
 # environment
+CHOCOLATEYTOOLSLOCATION = C:\tools
+# environment
 PROCESSOR_IDENTIFIER = Intel64 Family 6 Model 158 Stepping 10, GenuineIntel
 # variable set hash-table stats:
-# Load=106/1024=10%, Rehash=0, Collisions=12/136=9%
+# Load=108/1024=11%, Rehash=0, Collisions=11/138=8%
 
 # Pattern-specific Variable Values
 
@@ -233,9 +239,9 @@ PROCESSOR_IDENTIFIER = Intel64 Family 6 Model 158 Stepping 10, GenuineIntel
 
 # Directories
 
-# . (device 583634660, inode 281474977834679): 7 files, no impossibilities.
+# . (device 583634660, inode 281474977834679): 12 files, no impossibilities.
 
-# 7 files, no impossibilities in 1 directories.
+# 12 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -258,12 +264,12 @@ all: main.o
 # variable set hash-table stats:
 # Load=0/32=0%, Rehash=0, Collisions=0/3=0%
 #  recipe to execute (from 'makefile', line 3):
-	g++ -O3 -o ./bin/main.exe ./bin/main.o
+	g++ -O3 -std=c++2a -o ./bin/main.exe ./bin/main.o -Llib -lvulkan -lglfw3 -lgdi32
 
 # Not a target:
 main.cpp:
 #  Implicit rule search has been done.
-#  Last modified 2021-08-26 11:59:54.7993573
+#  Last modified 2021-12-13 16:55:11.0258808
 #  File has been updated.
 #  Successfully updated.
 
@@ -292,17 +298,18 @@ main.o: main.cpp
 # variable set hash-table stats:
 # Load=8/32=25%, Rehash=0, Collisions=1/11=9%
 #  recipe to execute (from 'makefile', line 6):
-	g++ -c -O3 -o ./bin/main.o main.cpp
+	g++ -c -O3 -std=c++2a -o ./bin/main.o main.cpp -Iinclude 
 
 # Not a target:
 makefile:
 #  Implicit rule search has been done.
-#  Last modified 2021-08-26 11:28:26.3637536
+#  Last modified 2021-12-13 16:55:24.5786176
 #  File has been updated.
 #  Successfully updated.
 
 # Not a target:
 .SUFFIXES:
+ 
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
@@ -315,12 +322,12 @@ makefile:
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 12 / storage = 86 B / avg = 7 B
-# current buf: size = 8162 B / used = 86 B / count = 12 / avg = 7 B
+# strcache buffers: 1 (0) / strings = 17 / storage = 129 B / avg = 7 B
+# current buf: size = 8162 B / used = 129 B / count = 17 / avg = 7 B
 
-# strcache performance: lookups = 22 / hit rate = 45%
+# strcache performance: lookups = 27 / hit rate = 37%
 # hash-table stats:
-# Load=12/8192=0%, Rehash=0, Collisions=0/22=0%
-# Finished Make data base on Thu Aug 26 12:06:24 2021
+# Load=17/8192=0%, Rehash=0, Collisions=0/27=0%
+# Finished Make data base on Mon Dec 13 16:55:33 2021
 
  

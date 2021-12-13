@@ -1,6 +1,6 @@
-make.exe all --dry-run --always-make --keep-going --print-directory
+make.exe all --dry-run --keep-going --print-directory
 make: Entering directory '/d/program/0z'
-g++ -c -O3 -o ./bin/main.o main.cpp
-g++ -O3 -o ./bin/main.exe ./bin/main.o
+g++ -c -O3 -std=c++2a -o ./bin/main.o main.cpp -Iinclude 
+g++ -O3 -std=c++2a -o ./bin/main.exe ./bin/main.o -Llib -lvulkan -lglfw3 -lgdi32
 make: Leaving directory '/d/program/0z'
  
