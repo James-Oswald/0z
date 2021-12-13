@@ -16,7 +16,7 @@
             "cppStandard": "c++20",
             "intelliSenseMode": "windows-gcc-x64",
             "compilerArgs": [
-                "-I./include"
+                "-Iinclude"
             ]
         }
     ],
