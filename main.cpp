@@ -19,13 +19,14 @@
 #include<vulkan/vulkan.hpp>
 
 struct QueueFamilyIndices{
-    QueueFamilyIndices(std::optional<uint32_t>);
+    //QueueFamilyIndices(std::optional<uint32_t>);
+    float graphicsFamilyPriority;
     std::optional<uint32_t> graphicsFamily;
 };
 
-QueueFamilyIndices::QueueFamilyIndices(std::optional<uint32_t> graphicsFamily_)
+/*QueueFamilyIndices::QueueFamilyIndices(std::optional<uint32_t> graphicsFamily_)
 :graphicsFamily(graphicsFamily_)
-{}
+{}*/
 
 class Application{
     public:
@@ -33,9 +34,9 @@ class Application{
         vk::Instance instance;
         vk::ApplicationInfo appInfo;
         vk::InstanceCreateInfo createInfo;
-        std::vector<vk::PhysicalDevice> physicalDevices;
+        std::vector<vk::PhysicalDevice> physicalDevices; //GPUs
         std::vector<QueueFamilyIndices> physicalDeviceQueueFamilies;
-        std::vector<vk::PhysicalDevice> logicalDevices;
+        std::vector<vk::Device> logicalDevices;
 
         Application();
         ~Application();
@@ -124,28 +125,49 @@ Application::Application(){
         vk::PhysicalDeviceProperties deviceProps = device.getProperties();
         if(deviceProps.deviceType == vk::PhysicalDeviceType::eDiscreteGpu){ //We only allow discrte GPUs cause we're dumb
             std::vector<vk::QueueFamilyProperties> queueFamProps = device.getQueueFamilyProperties();
-            std::optional<uint32_t> graphicsLocation; 
+            QueueFamilyIndices indices {};
             for(int i = 0; i < queueFamProps.size(); i++)
                 if(queueFamProps[i].queueFlags & vk::QueueFlagBits::eGraphics){
-                    graphicsLocation = i;
+                    indices.graphicsFamily = i;
                     break;
                 }
-            if(graphicsLocation.has_value()){  //We have to have graphics capabilities on our GPU
+            if(indices.graphicsFamily.has_value()){  //We have to have graphics capabilities on our GPU
                 physicalDevices.push_back(device);
-                physicalDeviceQueueFamilies.emplace_back(graphicsLocation);
+                indices.graphicsFamilyPriority = 1.0f;
+                physicalDeviceQueueFamilies.push_back(indices);
             }
         }
     }
     if(physicalDevices.size() == 0)
         throw std::runtime_error("Failed to find GPUs that meet criteria!");
-    /*for(const vk::PhysicalDevice& device : devices){
-        device.getQueueFamilyProperties()
-    }*/
+    for(int i = 0; i < physicalDevices.size(); i++){
+        const vk::PhysicalDevice& device = physicalDevices[i];
+        const QueueFamilyIndices& indices = physicalDeviceQueueFamilies[i];
+        vk::DeviceQueueCreateInfo queueCreateInfo;
+        queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
+        queueCreateInfo.queueCount = 1;
+        queueCreateInfo.pQueuePriorities = &indices.graphicsFamilyPriority;
+        vk::PhysicalDeviceFeatures deviceFeatures;
+        vk::DeviceCreateInfo deviceCreateInfo;
+        deviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;
+        deviceCreateInfo.queueCreateInfoCount = 1;
+        deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
+        deviceCreateInfo.enabledExtensionCount = 0;
+#ifdef USEVALIDLAYERS //For backwards compatability
+        deviceCreateInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+        deviceCreateInfo.ppEnabledLayerNames = validationLayers.data();
+#else
+        deviceCreateInfo.enabledLayerCount = 0;
+#endif
+        logicalDevices.push_back(device.createDevice(deviceCreateInfo));
+    }
 }
 
 Application::~Application(){
     instance.destroy();
     window.destroy();
+    for(vk::Device dev : logicalDevices)
+        dev.destroy();
     vkfw::terminate();
 }
 
