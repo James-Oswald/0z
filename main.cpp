@@ -18,10 +18,12 @@
 #include<vkfw.hpp>
 #include<vulkan/vulkan.hpp>
 
-struct QueueFamilyIndices{
+struct QueueFamilyInfo{
     //QueueFamilyIndices(std::optional<uint32_t>);
-    float graphicsFamilyPriority;
+    float graphicsFamilyPriority = 1;
+    float presentationFamilyPriority = 1;
     std::optional<uint32_t> graphicsFamily;
+    std::optional<uint32_t> presentationFamily; 
 };
 
 /*QueueFamilyIndices::QueueFamilyIndices(std::optional<uint32_t> graphicsFamily_)
@@ -34,9 +36,11 @@ class Application{
         vk::Instance instance;
         vk::ApplicationInfo appInfo;
         vk::InstanceCreateInfo createInfo;
-        std::vector<vk::PhysicalDevice> physicalDevices; //GPUs
-        std::vector<QueueFamilyIndices> physicalDeviceQueueFamilies;
-        std::vector<vk::Device> logicalDevices;
+        vk::PhysicalDevice physicalDevice;
+        QueueFamilyInfo queueFamilyInfo;
+        vk::Device logicalDevice;
+        vk::Queue graphicsQueue;
+        vk::SurfaceKHR surface;
 
         Application();
         ~Application();
@@ -70,6 +74,14 @@ Application::Application(){
     }
 #endif
 
+#ifdef LOG
+    //Log available vulkan extensions
+    std::vector<vk::ExtensionProperties> extensions = vk::enumerateInstanceExtensionProperties();
+    std::cout<<"Available Extensions"<<"\n";
+    for(const auto& extension : extensions)
+        std::cout<<"\t"<<extension.extensionName<<"\n";
+#endif
+
     //Window Setup
     vkfw::init();
     vkfw::WindowHints hints;
@@ -97,22 +109,16 @@ Application::Application(){
     vk::Result createInstanceResult = vk::createInstance(&createInfo, nullptr, &instance);
     if(createInstanceResult != vk::Result::eSuccess)
         throw std::runtime_error(std::string("VK Instance creation failed with code") + std::to_string((int)createInstanceResult));
-    
-    //Extensioon selection?
-    std::vector<vk::ExtensionProperties> extensions = vk::enumerateInstanceExtensionProperties();
-#ifdef LOG
-    std::cout<<"Available Extensions"<<"\n";
-    for(const auto& extension : extensions)
-        std::cout<<"\t"<<extension.extensionName<<"\n";
-#endif
+    surface = vkfw::createWindowSurface(instance, window);
+
 
     //Physical Device Selection
-    std::vector<vk::PhysicalDevice> devices = instance.enumeratePhysicalDevices();
-    if (devices.size()==0) 
+    std::vector<vk::PhysicalDevice> allPhysicalDevices = instance.enumeratePhysicalDevices(); //All available graphics hardware
+    if (allPhysicalDevices.size()==0) 
         throw std::runtime_error("Failed to find GPUs with Vulkan support!");
 #ifdef LOG
     std::cout<<"Available Physical Graphics Hardware"<<"\n";
-    for(const vk::PhysicalDevice& device : devices){
+    for(const vk::PhysicalDevice& device : allPhysicalDevices){
         vk::PhysicalDeviceProperties props = device.getProperties();
         std::cout<<"\t"<<props.deviceName<<"\n";
         std::cout<<"\t\t"<<props.apiVersion<<"\n";
@@ -121,53 +127,59 @@ Application::Application(){
     }
 #endif
     //Select GPUs based on desired features that are available
-    for(const vk::PhysicalDevice& device : devices){
+    std::vector<vk::PhysicalDevice> myPhysicalDevices;  //All hardware that meets our criteria
+    std::vector<QueueFamilyInfo> myQueueFamilyInfo;
+    for(const vk::PhysicalDevice& device : allPhysicalDevices){
         vk::PhysicalDeviceProperties deviceProps = device.getProperties();
-        if(deviceProps.deviceType == vk::PhysicalDeviceType::eDiscreteGpu){ //We only allow discrte GPUs cause we're dumb
+        if(deviceProps.deviceType == vk::PhysicalDeviceType::eDiscreteGpu){ //We only allow discrte GPUs cause we're too cool for IG
             std::vector<vk::QueueFamilyProperties> queueFamProps = device.getQueueFamilyProperties();
-            QueueFamilyIndices indices {};
-            for(int i = 0; i < queueFamProps.size(); i++)
+            QueueFamilyInfo queueInfo {};
+            for(int i = 0; i < queueFamProps.size(); i++){
                 if(queueFamProps[i].queueFlags & vk::QueueFlagBits::eGraphics){
-                    indices.graphicsFamily = i;
+                    queueInfo.graphicsFamily = i;
                     break;
                 }
-            if(indices.graphicsFamily.has_value()){  //We have to have graphics capabilities on our GPU
-                physicalDevices.push_back(device);
-                indices.graphicsFamilyPriority = 1.0f;
-                physicalDeviceQueueFamilies.push_back(indices);
+            }
+            if(queueInfo.graphicsFamily.has_value()){  //We have to have graphics capabilities on our GPU
+                myPhysicalDevices.push_back(std::move(device));
+                queueInfo.graphicsFamilyPriority = 1.0f;
+                myQueueFamilyInfo.push_back(std::move(queueInfo));
             }
         }
     }
-    if(physicalDevices.size() == 0)
+    if(myPhysicalDevices.size() == 0)
         throw std::runtime_error("Failed to find GPUs that meet criteria!");
-    for(int i = 0; i < physicalDevices.size(); i++){
-        const vk::PhysicalDevice& device = physicalDevices[i];
-        const QueueFamilyIndices& indices = physicalDeviceQueueFamilies[i];
-        vk::DeviceQueueCreateInfo queueCreateInfo;
-        queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
-        queueCreateInfo.queueCount = 1;
-        queueCreateInfo.pQueuePriorities = &indices.graphicsFamilyPriority;
-        vk::PhysicalDeviceFeatures deviceFeatures;
-        vk::DeviceCreateInfo deviceCreateInfo;
-        deviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;
-        deviceCreateInfo.queueCreateInfoCount = 1;
-        deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
-        deviceCreateInfo.enabledExtensionCount = 0;
+    
+    //Select an arbitrary gpu from acceptable gpus. revamp this later to select better
+    physicalDevice = myPhysicalDevices[0];
+    queueFamilyInfo = myQueueFamilyInfo[0];
+
+    //Create a logical device
+    vk::DeviceQueueCreateInfo queueCreateInfo;
+    queueCreateInfo.queueFamilyIndex = queueFamilyInfo.graphicsFamily.value();
+    queueCreateInfo.queueCount = 1;
+    queueCreateInfo.pQueuePriorities = &queueFamilyInfo.graphicsFamilyPriority;
+    vk::PhysicalDeviceFeatures deviceFeatures;
+    vk::DeviceCreateInfo deviceCreateInfo;
+    deviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;
+    deviceCreateInfo.queueCreateInfoCount = 1;
+    deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
+    deviceCreateInfo.enabledExtensionCount = 0;
 #ifdef USEVALIDLAYERS //For backwards compatability
-        deviceCreateInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
-        deviceCreateInfo.ppEnabledLayerNames = validationLayers.data();
+    deviceCreateInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+    deviceCreateInfo.ppEnabledLayerNames = validationLayers.data();
 #else
-        deviceCreateInfo.enabledLayerCount = 0;
+    deviceCreateInfo.enabledLayerCount = 0;
 #endif
-        logicalDevices.push_back(device.createDevice(deviceCreateInfo));
-    }
+    logicalDevice = physicalDevice.createDevice(deviceCreateInfo);
+    graphicsQueue = logicalDevice.getQueue(queueFamilyInfo.graphicsFamily.value(), 0);
 }
 
 Application::~Application(){
+    logicalDevice.destroy();
+    instance.destroySurfaceKHR(surface);
     instance.destroy();
     window.destroy();
-    for(vk::Device dev : logicalDevices)
-        dev.destroy();
     vkfw::terminate();
 }
 
