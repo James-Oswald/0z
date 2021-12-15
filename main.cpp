@@ -31,13 +31,9 @@ class Application{
         void initLibs();
         void selectPhysicalDevice();
 #ifdef USE_VALIDATION_LAYERS        
-        const std::vector<const char*> validationLayers = {
-            "VK_LAYER_KHRONOS_validation"
-        };
+        const std::vector<const char*> validationLayers = {"VK_LAYER_KHRONOS_validation"};
 #endif
-        const std::vector<const char*> requiredDeviceExtensions = {
-            VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-        };
+        const std::vector<const char*> requiredDeviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
     public:
         struct QueueFamilyInfo{
             float graphicsFamilyPriority = 1;
@@ -45,9 +41,15 @@ class Application{
             std::optional<uint32_t> graphicsFamily;
             std::optional<uint32_t> presentationFamily; 
         };
+        struct SwapChainInfo{
+            vk::SurfaceCapabilitiesKHR capabilities;
+            std::vector<vk::SurfaceFormatKHR> formats;
+            std::vector<vk::PresentModeKHR> presentModes;
+        };
         struct PhysicalDeviceInfo{ //Holds information about physical devices
             vk::PhysicalDevice physicalDevice;
             QueueFamilyInfo queueFamilyInfo;
+            SwapChainInfo SwapChainInfo;
             std::vector<vk::ExtensionProperties> extensionProps;
         };
 
@@ -56,7 +58,7 @@ class Application{
         vk::ApplicationInfo appInfo;
         vk::InstanceCreateInfo createInfo;
         std::vector<PhysicalDeviceInfo> physicalDevices; //All Physical Devices
-        PhysicalDeviceInfo physicalDeviceInfo;           //A ref to the selected physical device this app is running on.
+        PhysicalDeviceInfo physicalDeviceInfo;           //A the selected physical device this app is running on.
         vk::Device logicalDevice;
         vk::Queue graphicsQueue;
         vk::SurfaceKHR surface;
@@ -163,6 +165,16 @@ void Application::selectPhysicalDevice(){
             requiredExtensions.erase(extension.extensionName);
         if(!requiredExtensions.empty())
             continue;
+
+        //We need the swap chain to be good
+        SwapChainInfo swapChainInfo;
+        swapChainInfo.formats = device.getSurfaceFormatsKHR(surface);
+        if(swapChainInfo.formats.empty())
+            continue;
+        swapChainInfo.presentModes = device.getSurfacePresentModesKHR(surface);
+        if(swapChainInfo.formats.empty())
+            continue;
+        swapChainInfo.capabilities = device.getSurfaceCapabilitiesKHR(surface);
 
         //We have to have graphics capabilities on our GPU and surface support
         std::vector<vk::QueueFamilyProperties> queueFamProps = device.getQueueFamilyProperties();

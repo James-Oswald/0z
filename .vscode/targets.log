@@ -8,14 +8,14 @@ make.exe all --print-data-base --no-builtin-variables --no-builtin-rules --quest
 # There is NO WARRANTY, to the extent permitted by law.
  
 
-# Make data base, printed on Wed Dec 15 04:49:56 2021
+# Make data base, printed on Wed Dec 15 18:30:00 2021
 
 # Variables
 
 # environment
- 
 FPS_BROWSER_APP_PROFILE_STRING = Internet Explorer
 # environment
+ 
 SYSTEMDRIVE = C:
 # environment
 JAVA_HOME = D:\Programming\JavaVersions\jdk-15.0.2\bin
@@ -123,7 +123,6 @@ MAKE_HOST := x86_64-pc-msys
 PROGRAMDATA = C:\ProgramData
 # default
 SHELL := /bin/sh
- 
 # environment
 EXE4J_JAVA_HOME = D:\Programming\JavaVersions\jdk-15.0.2\bin
 # environment
@@ -164,6 +163,7 @@ VSCODE_LOG_NATIVE = false
 USERNAME = James
 # environment
 COMMONPROGRAMFILES = C:\Program Files\Common Files
+ 
 # automatic
 ?F = $(notdir $?)
 # environment
@@ -218,7 +218,6 @@ COMMONPROGRAMFILES(X86) = C:\Program Files (x86)\Common Files
 ELECTRON_RUN_AS_NODE = 1
 # environment
 TEMP = /c/Users/James/AppData/Local/Temp
- 
 # environment
 VSCODE_IPC_HOOK = \\.\pipe\e7ca4567f3c0e5773e950c3eb9ce4dc1-1.63.0-main-sock
 # environment
@@ -234,7 +233,7 @@ ALLUSERSPROFILE = C:\ProgramData
 # environment
 SESSIONNAME = Console
 # makefile (from 'makefile', line 8)
-CXXFLAGS = -g -std=c++2a
+CXXFLAGS = -g -O3 -std=c++2a
 # default
 .FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell nocomment grouped-target extra-prereqs archives jobserver output-sync check-symlink load
 # environment
@@ -264,6 +263,7 @@ PROCESSOR_IDENTIFIER = Intel64 Family 6 Model 158 Stepping 10, GenuineIntel
 # Implicit Rules
 
 bin/%.o: %.cpp include/vkfw.hpp.gch
+ 
 #  recipe to execute (from 'makefile', line 26):
 	$(CC) $(CXXFLAGS) -c -o $@ $< $(INCLUDES) 
 
@@ -280,18 +280,29 @@ include/vkfw.hpp:
 bin/main.o: main.cpp include/vkfw.hpp.gch
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'main'
-#  Last modified 2021-12-15 04:28:57.7571956
+#  Last modified 2021-12-15 07:18:44.7271333
 #  File has been updated.
-#  Successfully updated.
+#  Needs to be updated (-q is set).
+# automatic
+# @ := bin/main.o
+# automatic
+# * := main
+# automatic
+# < := main.cpp
+# automatic
+# + := main.cpp include/vkfw.hpp.gch
+# automatic
+# % := 
+# automatic
+# ^ := main.cpp include/vkfw.hpp.gch
+# automatic
+# ? := main.cpp
+# automatic
+# | := 
+# variable set hash-table stats:
+# Load=8/32=25%, Rehash=0, Collisions=2/16=12%
 #  recipe to execute (from 'makefile', line 26):
 	$(CC) $(CXXFLAGS) -c -o $@ $< $(INCLUDES) 
-
-# Not a target:
-settings.cpp:
-#  Implicit rule search has been done.
-#  Last modified 2021-12-13 02:53:16.8577751
-#  File has been updated.
-#  Successfully updated.
 
 include/vkfw.hpp.gch: include/vkfw.hpp
 #  Implicit rule search has not been done.
@@ -304,81 +315,55 @@ include/vkfw.hpp.gch: include/vkfw.hpp
 # Not a target:
 .DEFAULT:
 #  Implicit rule search has not been done.
- 
 #  Modification time never checked.
 #  File has not been updated.
 
 all: bin/main.o bin/settings.o
 #  Command line target.
 #  Implicit rule search has not been done.
-#  Implicit/static pattern stem: ''
 #  File does not exist.
 #  File has been updated.
 #  Needs to be updated (-q is set).
-# automatic
-# @ := all
-# automatic
-# * := 
-# automatic
-# < := bin/main.o
-# automatic
-# + := bin/main.o bin/settings.o
-# automatic
-# % := 
-# automatic
-# ^ := bin/main.o bin/settings.o
-# automatic
-# ? := bin/main.o bin/settings.o
-# automatic
-# | := 
 # variable set hash-table stats:
-# Load=8/32=25%, Rehash=0, Collisions=3/15=20%
+# Load=0/32=0%, Rehash=0, Collisions=0/6=0%
 #  recipe to execute (from 'makefile', line 23):
 	$(CC) $(CXXFLAGS) -o ./bin/main.exe $? $(LDFLAGS)
 
 # Not a target:
 main.cpp:
 #  Implicit rule search has been done.
-#  Last modified 2021-12-15 04:28:36.0984797
-#  File has been updated.
-#  Successfully updated.
-
-bin/settings.o: settings.cpp include/vkfw.hpp.gch
-#  Implicit rule search has been done.
-#  Implicit/static pattern stem: 'settings'
-#  Last modified 2021-12-15 04:28:57.8651985
-#  File has been updated.
-#  Successfully updated.
-#  recipe to execute (from 'makefile', line 26):
-	$(CC) $(CXXFLAGS) -c -o $@ $< $(INCLUDES) 
-
-# Not a target:
-makefile:
-#  Implicit rule search has been done.
-#  Last modified 2021-12-15 04:49:54.209664
+#  Last modified 2021-12-15 07:22:26.0404182
 #  File has been updated.
 #  Successfully updated.
 
 # Not a target:
-.SUFFIXES:
+bin/settings.o:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
 
+# Not a target:
+makefile:
+#  Implicit rule search has been done.
+#  Last modified 2021-12-15 07:43:53.859541
+#  File has been updated.
+#  Successfully updated.
+
 # files hash-table stats:
-# Load=10/1024=1%, Rehash=0, Collisions=0/35=0%
+# Load=9/1024=1%, Rehash=0, Collisions=0/28=0%
 # VPATH Search Paths
+ 
 
 # No 'vpath' search paths.
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 24 / storage = 214 B / avg = 8 B
-# current buf: size = 8162 B / used = 214 B / count = 24 / avg = 8 B
+# strcache buffers: 1 (0) / strings = 23 / storage = 205 B / avg = 8 B
+# current buf: size = 8162 B / used = 205 B / count = 23 / avg = 8 B
 
-# strcache performance: lookups = 42 / hit rate = 42%
+# strcache performance: lookups = 36 / hit rate = 36%
 # hash-table stats:
-# Load=24/8192=0%, Rehash=0, Collisions=0/42=0%
-# Finished Make data base on Wed Dec 15 04:49:56 2021
+# Load=23/8192=0%, Rehash=0, Collisions=0/36=0%
+# Finished Make data base on Wed Dec 15 18:30:00 2021
 
  

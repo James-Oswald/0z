@@ -5,7 +5,7 @@
 
 
 CC= g++
-CXXFLAGS= -g -std=c++2a
+CXXFLAGS= -g -O3 -std=c++2a
 LDFLAGS=-Llib -lglfw3 -lgdi32
 #Bug that forces you to link against Vulkan SDKs vulkan-1 dll rather than msys's to use 
 #https://github.com/glfw/glfw/issues/1900
