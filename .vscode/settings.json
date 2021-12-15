@@ -5,6 +5,11 @@
             "cwd": "\\d\\program\\0z\\bin",
             "binaryPath": "\\d\\program\\0z\\bin\\main.exe",
             "binaryArgs": []
+        },
+        {
+            "cwd": "d:\\program\\0z\\bin",
+            "binaryPath": "d:\\program\\0z\\bin\\main.exe",
+            "binaryArgs": []
         }
     ],
     "files.associations": {

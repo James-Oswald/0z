@@ -1,10 +1,15 @@
 
+//Put this first to utilize the precompiled vkfw.hpp header
+#include<vkfw.hpp>
+#include<vulkan/vulkan.hpp>
+
 #define LOG
 #define USEVALIDLAYERS
 
 #ifdef USEVALIDLAYERS
 #include<cstdlib>
 #endif
+
 
 #ifdef LOG
 #include<iostream>
@@ -14,9 +19,6 @@
 #include<vector>
 #include<string>
 #include<optional>
-
-#include<vkfw.hpp>
-#include<vulkan/vulkan.hpp>
 
 struct QueueFamilyInfo{
     //QueueFamilyIndices(std::optional<uint32_t>);
@@ -58,7 +60,7 @@ Application::Application(){
     };
     std::vector<vk::LayerProperties> availableLayers = vk::enumerateInstanceLayerProperties();
 #ifdef LOG
-    std::cout<<"Available Validation Layers"<<"\n";
+    std::cout<<"Available Layers"<<"\n";
     for(const auto& layer : availableLayers)
         std::cout<<"\t"<< layer.layerName<<"\n";
 #endif
@@ -84,7 +86,7 @@ Application::Application(){
 
     //Window Setup
     vkfw::init();
-    vkfw::WindowHints hints;
+    vkfw::WindowHints hints {};
     hints.clientAPI = vkfw::ClientAPI::eNone;
     window = vkfw::createWindow(800, 600, "0z", hints);
 
@@ -109,7 +111,9 @@ Application::Application(){
     vk::Result createInstanceResult = vk::createInstance(&createInfo, nullptr, &instance);
     if(createInstanceResult != vk::Result::eSuccess)
         throw std::runtime_error(std::string("VK Instance creation failed with code") + std::to_string((int)createInstanceResult));
-    surface = vkfw::createWindowSurface(instance, window);
+    surface = vkfw::createWindowSurface(instance, window, nullptr);
+    if(!(bool)surface)
+        throw std::runtime_error("Failed to create surface");
 
 
     //Physical Device Selection
@@ -135,14 +139,14 @@ Application::Application(){
             std::vector<vk::QueueFamilyProperties> queueFamProps = device.getQueueFamilyProperties();
             QueueFamilyInfo queueInfo {};
             for(int i = 0; i < queueFamProps.size(); i++){
-                if(queueFamProps[i].queueFlags & vk::QueueFlagBits::eGraphics){
+                if(queueFamProps[i].queueFlags & vk::QueueFlagBits::eGraphics)
                     queueInfo.graphicsFamily = i;
-                    break;
-                }
+                else if(device.getSurfaceSupportKHR(i, surface))
+                    queueInfo.presentationFamily = i;
             }
-            if(queueInfo.graphicsFamily.has_value()){  //We have to have graphics capabilities on our GPU
+            //We have to have graphics capabilities on our GPU and surface support
+            if(queueInfo.graphicsFamily.has_value() && queueInfo.presentationFamily.has_value()){  
                 myPhysicalDevices.push_back(std::move(device));
-                queueInfo.graphicsFamilyPriority = 1.0f;
                 myQueueFamilyInfo.push_back(std::move(queueInfo));
             }
         }
@@ -173,6 +177,7 @@ Application::Application(){
 #endif
     logicalDevice = physicalDevice.createDevice(deviceCreateInfo);
     graphicsQueue = logicalDevice.getQueue(queueFamilyInfo.graphicsFamily.value(), 0);
+
 }
 
 Application::~Application(){
