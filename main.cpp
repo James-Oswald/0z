@@ -33,6 +33,8 @@ struct QueueFamilyInfo{
 {}*/
 
 class Application{
+    private:
+        static void glfwErrorCallback(int, const char*);
     public:
         vkfw::Window window;
         vk::Instance instance;
@@ -49,8 +51,11 @@ class Application{
         void mainLoop();
 };
 
-Application::Application(){
+void Application::glfwErrorCallback(int errorCode, const char* error){
+    throw std::runtime_error(std::string("GLFW encountered an error!\n ") + error + "\n");
+}
 
+Application::Application(){
     //Validation Layer Setup
 #ifdef USEVALIDLAYERS
     putenv("VK_LAYER_PATH=D:\\Software\\VulkanSDK\\Bin");
@@ -85,6 +90,7 @@ Application::Application(){
 #endif
 
     //Window Setup
+    vkfw::setErrorCallback(&glfwErrorCallback);
     vkfw::init();
     vkfw::WindowHints hints {};
     hints.clientAPI = vkfw::ClientAPI::eNone;

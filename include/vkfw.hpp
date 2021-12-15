@@ -2645,7 +2645,7 @@ namespace VKFW_NAMESPACE {
 	createWindowSurface(vk::Instance const &instance, Window const &window,
 						VkAllocationCallbacks const *allocator = nullptr) {
 		VkSurfaceKHR output;
-		volatile VkResult res = glfwCreateWindowSurface(instance, window, allocator, &output);
+		glfwCreateWindowSurface(instance, window, allocator, &output);
 		return output;
 	}
 #   ifndef VKFW_NO_SMART_HANDLE

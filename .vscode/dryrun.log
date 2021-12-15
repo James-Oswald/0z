@@ -1,8 +1,5 @@
-make.exe all --dry-run --always-make --keep-going --print-directory
+make.exe all --dry-run --keep-going --print-directory
 make: Entering directory '/d/program/0z'
-g++ -g -std=c++2a include/vkfw.hpp
-g++ -g -std=c++2a -c -o bin/main.o main.cpp -Iinclude 
-g++ -g -std=c++2a -c -o bin/settings.o settings.cpp -Iinclude 
-g++ -o ./bin/main.exe bin/main.o bin/settings.o -Llib -lvulkan -lglfw3 -lgdi32
+g++ -g -std=c++2a -o ./bin/main.exe bin/main.o bin/settings.o -Llib -lglfw3 -lgdi32 -lvulkan-1
 make: Leaving directory '/d/program/0z'
  

@@ -3,22 +3,23 @@ make.exe all --print-data-base --no-builtin-variables --no-builtin-rules --quest
 # Built for x86_64-pc-msys
 # Copyright (C) 1988-2020 Free Software Foundation, Inc.
 # License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+ 
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
  
 
-# Make data base, printed on Wed Dec 15 04:07:01 2021
+# Make data base, printed on Wed Dec 15 04:49:56 2021
 
 # Variables
 
 # environment
+ 
 FPS_BROWSER_APP_PROFILE_STRING = Internet Explorer
 # environment
 SYSTEMDRIVE = C:
 # environment
 JAVA_HOME = D:\Programming\JavaVersions\jdk-15.0.2\bin
 # environment
- 
 LC_ALL = C
 # environment
 _MSYS2_BASH = C:\msys64\usr\bin\bash.exe
@@ -33,7 +34,7 @@ VBOX_MSI_INSTALL_PATH = D:\Programming\VBox\
 # environment
 LOCALAPPDATA = C:\Users\James\AppData\Local
 # environment
-VSCODE_IPC_HOOK_EXTHOST = \\.\pipe\vscode-ipc-7898c5b8-55be-4fef-bfdd-8e5f3ed55dbe-sock
+VSCODE_IPC_HOOK_EXTHOST = \\.\pipe\vscode-ipc-fc2992ed-ed43-45f4-afc0-cd064c879c63-sock
 # environment
 VSCODE_CWD = C:\Users\James\AppData\Local\Programs\Microsoft VS Code
 # environment
@@ -108,7 +109,7 @@ VSCODE_PID = 3720
 CLION = D:\CLion\bin;
 # automatic
 ?D = $(patsubst %/,%,$(dir $?))
-# makefile (from 'makefile', line 8)
+# makefile (from 'makefile', line 18)
 INCLUDES = -Iinclude
 # automatic
 *F = $(notdir $*)
@@ -122,10 +123,10 @@ MAKE_HOST := x86_64-pc-msys
 PROGRAMDATA = C:\ProgramData
 # default
 SHELL := /bin/sh
+ 
 # environment
 EXE4J_JAVA_HOME = D:\Programming\JavaVersions\jdk-15.0.2\bin
 # environment
- 
 HOMEPATH = \Users\James
 # default
 MAKECMDGOALS := all
@@ -135,7 +136,6 @@ DRIVERDATA = C:\Windows\System32\Drivers\DriverData
 COMSPEC = C:\WINDOWS\system32\cmd.exe
 # environment
 WINDIR = C:\WINDOWS
- 
 # environment
 MAKELEVEL := 0
 # default
@@ -174,7 +174,7 @@ PATHEXT = .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
 +F = $(notdir $+)
 # environment
 ORIGINAL_XDG_CURRENT_DESKTOP = undefined
-# makefile (from 'makefile', line 10)
+# makefile (from 'makefile', line 20)
 OBJECTS = $(SOURCES:%.cpp=./bin/%.o)
 # environment
 USERDOMAIN = JAMESOSWALDPC
@@ -190,9 +190,8 @@ MAGICK_HOME = C:\msys64\mingw64\lib\ImageMagick-7.0.9\modules-Q16HDRI\coders
 MAKE_VERSION := 4.3
 # environment
 PROGRAMFILES(X86) = C:\Program Files (x86)
-# makefile (from 'makefile', line 7)
-LDFLAGS = -Llib -lvulkan -lglfw3 -lgdi32
- 
+# makefile (from 'makefile', line 14)
+LDFLAGS = -Llib -lglfw3 -lgdi32 -lvulkan-1
 # environment
 !D: = d:\program\0z
 # environment
@@ -219,6 +218,7 @@ COMMONPROGRAMFILES(X86) = C:\Program Files (x86)\Common Files
 ELECTRON_RUN_AS_NODE = 1
 # environment
 TEMP = /c/Users/James/AppData/Local/Temp
+ 
 # environment
 VSCODE_IPC_HOOK = \\.\pipe\e7ca4567f3c0e5773e950c3eb9ce4dc1-1.63.0-main-sock
 # environment
@@ -233,22 +233,22 @@ SUFFIXES :=
 ALLUSERSPROFILE = C:\ProgramData
 # environment
 SESSIONNAME = Console
-# makefile (from 'makefile', line 6)
+# makefile (from 'makefile', line 8)
 CXXFLAGS = -g -std=c++2a
 # default
 .FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell nocomment grouped-target extra-prereqs archives jobserver output-sync check-symlink load
 # environment
 PROCESSOR_REVISION = 9e0a
-# makefile (from 'makefile', line 5)
+# makefile (from 'makefile', line 7)
 CC = g++
-# makefile (from 'makefile', line 9)
+# makefile (from 'makefile', line 19)
 SOURCES = $(wildcard *.cpp)
 # environment
 CHOCOLATEYTOOLSLOCATION = C:\tools
 # environment
 PROCESSOR_IDENTIFIER = Intel64 Family 6 Model 158 Stepping 10, GenuineIntel
 # variable set hash-table stats:
-# Load=116/1024=11%, Rehash=0, Collisions=12/151=8%
+# Load=116/1024=11%, Rehash=0, Collisions=12/154=8%
 
 # Pattern-specific Variable Values
 
@@ -264,7 +264,7 @@ PROCESSOR_IDENTIFIER = Intel64 Family 6 Model 158 Stepping 10, GenuineIntel
 # Implicit Rules
 
 bin/%.o: %.cpp include/vkfw.hpp.gch
-#  recipe to execute (from 'makefile', line 16):
+#  recipe to execute (from 'makefile', line 26):
 	$(CC) $(CXXFLAGS) -c -o $@ $< $(INCLUDES) 
 
 # 1 implicit rules, 0 (0.0%) terminal.
@@ -273,97 +273,112 @@ bin/%.o: %.cpp include/vkfw.hpp.gch
 # Not a target:
 include/vkfw.hpp:
 #  Implicit rule search has been done.
- 
-#  Last modified 2021-12-15 03:19:55.0807434
+#  Last modified 2021-12-15 04:27:59.6994857
 #  File has been updated.
 #  Successfully updated.
 
 bin/main.o: main.cpp include/vkfw.hpp.gch
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'main'
-#  Last modified 2021-12-15 03:59:46.4987226
+#  Last modified 2021-12-15 04:28:57.7571956
 #  File has been updated.
-#  Needs to be updated (-q is set).
-# automatic
-# @ := bin/main.o
-# automatic
-# * := main
-# automatic
-# < := main.cpp
-# automatic
-# + := main.cpp include/vkfw.hpp.gch
-# automatic
-# % := 
-# automatic
-# ^ := main.cpp include/vkfw.hpp.gch
-# automatic
-# ? := main.cpp
-# automatic
-# | := 
-# variable set hash-table stats:
-# Load=8/32=25%, Rehash=0, Collisions=2/16=12%
-#  recipe to execute (from 'makefile', line 16):
+#  Successfully updated.
+#  recipe to execute (from 'makefile', line 26):
 	$(CC) $(CXXFLAGS) -c -o $@ $< $(INCLUDES) 
+
+# Not a target:
+settings.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2021-12-13 02:53:16.8577751
+#  File has been updated.
+#  Successfully updated.
 
 include/vkfw.hpp.gch: include/vkfw.hpp
 #  Implicit rule search has not been done.
-#  Last modified 2021-12-15 03:58:58.3284158
+#  Last modified 2021-12-15 04:28:55.3671946
 #  File has been updated.
 #  Successfully updated.
-#  recipe to execute (from 'makefile', line 19):
+#  recipe to execute (from 'makefile', line 29):
 	$(CC) $(CXXFLAGS) $<
 
 # Not a target:
 .DEFAULT:
 #  Implicit rule search has not been done.
+ 
 #  Modification time never checked.
 #  File has not been updated.
 
 all: bin/main.o bin/settings.o
 #  Command line target.
 #  Implicit rule search has not been done.
+#  Implicit/static pattern stem: ''
 #  File does not exist.
 #  File has been updated.
 #  Needs to be updated (-q is set).
+# automatic
+# @ := all
+# automatic
+# * := 
+# automatic
+# < := bin/main.o
+# automatic
+# + := bin/main.o bin/settings.o
+# automatic
+# % := 
+# automatic
+# ^ := bin/main.o bin/settings.o
+# automatic
+# ? := bin/main.o bin/settings.o
+# automatic
+# | := 
 # variable set hash-table stats:
-# Load=0/32=0%, Rehash=0, Collisions=0/6=0%
-#  recipe to execute (from 'makefile', line 13):
-	$(CC) -o ./bin/main.exe $? $(LDFLAGS)
+# Load=8/32=25%, Rehash=0, Collisions=3/15=20%
+#  recipe to execute (from 'makefile', line 23):
+	$(CC) $(CXXFLAGS) -o ./bin/main.exe $? $(LDFLAGS)
 
 # Not a target:
 main.cpp:
 #  Implicit rule search has been done.
-#  Last modified 2021-12-15 04:05:30.68335
+#  Last modified 2021-12-15 04:28:36.0984797
 #  File has been updated.
 #  Successfully updated.
 
-# Not a target:
-bin/settings.o:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
+bin/settings.o: settings.cpp include/vkfw.hpp.gch
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'settings'
+#  Last modified 2021-12-15 04:28:57.8651985
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'makefile', line 26):
+	$(CC) $(CXXFLAGS) -c -o $@ $< $(INCLUDES) 
 
 # Not a target:
 makefile:
 #  Implicit rule search has been done.
-#  Last modified 2021-12-15 04:04:47.7596253
+#  Last modified 2021-12-15 04:49:54.209664
 #  File has been updated.
 #  Successfully updated.
 
+# Not a target:
+.SUFFIXES:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
 # files hash-table stats:
-# Load=9/1024=1%, Rehash=0, Collisions=0/28=0%
+# Load=10/1024=1%, Rehash=0, Collisions=0/35=0%
 # VPATH Search Paths
 
 # No 'vpath' search paths.
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 23 / storage = 205 B / avg = 8 B
-# current buf: size = 8162 B / used = 205 B / count = 23 / avg = 8 B
+# strcache buffers: 1 (0) / strings = 24 / storage = 214 B / avg = 8 B
+# current buf: size = 8162 B / used = 214 B / count = 24 / avg = 8 B
 
-# strcache performance: lookups = 36 / hit rate = 36%
+# strcache performance: lookups = 42 / hit rate = 42%
 # hash-table stats:
-# Load=23/8192=0%, Rehash=0, Collisions=0/36=0%
-# Finished Make data base on Wed Dec 15 04:07:01 2021
+# Load=24/8192=0%, Rehash=0, Collisions=0/42=0%
+# Finished Make data base on Wed Dec 15 04:49:56 2021
 
  
