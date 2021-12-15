@@ -1,12 +1,10 @@
-
 //Put this first to utilize the precompiled vkfw.hpp header
 #include<vkfw.hpp>
-#include<vulkan/vulkan.hpp>
 
 #define LOG
-#define USEVALIDLAYERS
+#define USE_VALIDATION_LAYERS
 
-#ifdef USEVALIDLAYERS
+#ifdef USE_VALIDATION_LAYERS
 #include<cstdlib>
 #endif
 
@@ -15,18 +13,13 @@
 #include<iostream>
 #endif
 
+#include<set>
 #include<cstdint>
 #include<vector>
 #include<string>
 #include<optional>
 
-struct QueueFamilyInfo{
-    //QueueFamilyIndices(std::optional<uint32_t>);
-    float graphicsFamilyPriority = 1;
-    float presentationFamilyPriority = 1;
-    std::optional<uint32_t> graphicsFamily;
-    std::optional<uint32_t> presentationFamily; 
-};
+
 
 /*QueueFamilyIndices::QueueFamilyIndices(std::optional<uint32_t> graphicsFamily_)
 :graphicsFamily(graphicsFamily_)
@@ -35,13 +28,35 @@ struct QueueFamilyInfo{
 class Application{
     private:
         static void glfwErrorCallback(int, const char*);
+        void initLibs();
+        void selectPhysicalDevice();
+#ifdef USE_VALIDATION_LAYERS        
+        const std::vector<const char*> validationLayers = {
+            "VK_LAYER_KHRONOS_validation"
+        };
+#endif
+        const std::vector<const char*> requiredDeviceExtensions = {
+            VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+        };
     public:
+        struct QueueFamilyInfo{
+            float graphicsFamilyPriority = 1;
+            float presentationFamilyPriority = 1;
+            std::optional<uint32_t> graphicsFamily;
+            std::optional<uint32_t> presentationFamily; 
+        };
+        struct PhysicalDeviceInfo{ //Holds information about physical devices
+            vk::PhysicalDevice physicalDevice;
+            QueueFamilyInfo queueFamilyInfo;
+            std::vector<vk::ExtensionProperties> extensionProps;
+        };
+
         vkfw::Window window;
         vk::Instance instance;
         vk::ApplicationInfo appInfo;
         vk::InstanceCreateInfo createInfo;
-        vk::PhysicalDevice physicalDevice;
-        QueueFamilyInfo queueFamilyInfo;
+        std::vector<PhysicalDeviceInfo> physicalDevices; //All Physical Devices
+        PhysicalDeviceInfo physicalDeviceInfo;           //A ref to the selected physical device this app is running on.
         vk::Device logicalDevice;
         vk::Queue graphicsQueue;
         vk::SurfaceKHR surface;
@@ -55,14 +70,11 @@ void Application::glfwErrorCallback(int errorCode, const char* error){
     throw std::runtime_error(std::string("GLFW encountered an error!\n ") + error + "\n");
 }
 
-Application::Application(){
+void Application::initLibs(){
     //Validation Layer Setup
-#ifdef USEVALIDLAYERS
+#ifdef USE_VALIDATION_LAYERS
     putenv("VK_LAYER_PATH=D:\\Software\\VulkanSDK\\Bin");
     putenv("VK_INSTANCE_LAYERS=\"VK_LAYER_LUNARG_api_dump;VK_LAYER_KHRONOS_validation\"");
-    const std::vector<const char*> validationLayers = {
-        "VK_LAYER_KHRONOS_validation"
-    };
     std::vector<vk::LayerProperties> availableLayers = vk::enumerateInstanceLayerProperties();
 #ifdef LOG
     std::cout<<"Available Layers"<<"\n";
@@ -98,7 +110,7 @@ Application::Application(){
 
     //Vulkan Setup
     appInfo = vk::ApplicationInfo();
-    appInfo.pApplicationName = "Hello Triangle";
+    appInfo.pApplicationName = "Oz";
     appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
     appInfo.pEngineName = "No Engine";
     appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
@@ -108,7 +120,7 @@ Application::Application(){
     const char** glfwExtensions = vkfw::getRequiredInstanceExtensions(&glfwExtensionCount);
     createInfo.enabledExtensionCount = glfwExtensionCount;
     createInfo.ppEnabledExtensionNames = glfwExtensions;
-#ifdef USEVALIDLAYERS
+#ifdef USE_VALIDATION_LAYERS
     createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
     createInfo.ppEnabledLayerNames = validationLayers.data();
 #else
@@ -120,8 +132,9 @@ Application::Application(){
     surface = vkfw::createWindowSurface(instance, window, nullptr);
     if(!(bool)surface)
         throw std::runtime_error("Failed to create surface");
+}
 
-
+void Application::selectPhysicalDevice(){
     //Physical Device Selection
     std::vector<vk::PhysicalDevice> allPhysicalDevices = instance.enumeratePhysicalDevices(); //All available graphics hardware
     if (allPhysicalDevices.size()==0) 
@@ -137,53 +150,67 @@ Application::Application(){
     }
 #endif
     //Select GPUs based on desired features that are available
-    std::vector<vk::PhysicalDevice> myPhysicalDevices;  //All hardware that meets our criteria
-    std::vector<QueueFamilyInfo> myQueueFamilyInfo;
     for(const vk::PhysicalDevice& device : allPhysicalDevices){
-        vk::PhysicalDeviceProperties deviceProps = device.getProperties();
-        if(deviceProps.deviceType == vk::PhysicalDeviceType::eDiscreteGpu){ //We only allow discrte GPUs cause we're too cool for IG
-            std::vector<vk::QueueFamilyProperties> queueFamProps = device.getQueueFamilyProperties();
-            QueueFamilyInfo queueInfo {};
-            for(int i = 0; i < queueFamProps.size(); i++){
-                if(queueFamProps[i].queueFlags & vk::QueueFlagBits::eGraphics)
-                    queueInfo.graphicsFamily = i;
-                else if(device.getSurfaceSupportKHR(i, surface))
-                    queueInfo.presentationFamily = i;
-            }
-            //We have to have graphics capabilities on our GPU and surface support
-            if(queueInfo.graphicsFamily.has_value() && queueInfo.presentationFamily.has_value()){  
-                myPhysicalDevices.push_back(std::move(device));
-                myQueueFamilyInfo.push_back(std::move(queueInfo));
-            }
-        }
-    }
-    if(myPhysicalDevices.size() == 0)
-        throw std::runtime_error("Failed to find GPUs that meet criteria!");
-    
-    //Select an arbitrary gpu from acceptable gpus. revamp this later to select better
-    physicalDevice = myPhysicalDevices[0];
-    queueFamilyInfo = myQueueFamilyInfo[0];
 
+        //We only allow discrte GPUs cause we're too cool for IG
+        vk::PhysicalDeviceProperties deviceProps = device.getProperties();
+        if(deviceProps.deviceType != vk::PhysicalDeviceType::eDiscreteGpu)
+            continue;
+        
+        std::vector<vk::ExtensionProperties> availableExtensions = device.enumerateDeviceExtensionProperties();
+        std::set<std::string> requiredExtensions(requiredDeviceExtensions.begin(), requiredDeviceExtensions.end());
+        for (const auto& extension : availableExtensions)
+            requiredExtensions.erase(extension.extensionName);
+        if(!requiredExtensions.empty())
+            continue;
+
+        //We have to have graphics capabilities on our GPU and surface support
+        std::vector<vk::QueueFamilyProperties> queueFamProps = device.getQueueFamilyProperties();
+        QueueFamilyInfo queueFamInfo;
+        for(int i = 0; i < queueFamProps.size(); i++){
+            if(queueFamProps[i].queueFlags & vk::QueueFlagBits::eGraphics)
+                queueFamInfo.graphicsFamily = i;
+            else if(device.getSurfaceSupportKHR(i, surface))
+                queueFamInfo.presentationFamily = i;
+        }
+        if(!(queueFamInfo.graphicsFamily.has_value() && queueFamInfo.presentationFamily.has_value()))
+            continue;
+
+        PhysicalDeviceInfo physicalDeviceInfo;
+        physicalDeviceInfo.physicalDevice = device;
+        physicalDeviceInfo.extensionProps = availableExtensions;
+        physicalDeviceInfo.queueFamilyInfo = queueFamInfo;
+        physicalDevices.push_back(std::move(physicalDeviceInfo));
+    }
+    if(physicalDevices.size() == 0)
+        throw std::runtime_error("Failed to find GPUs that meet criteria!");
+    physicalDeviceInfo = physicalDevices[0];
+}
+
+Application::Application(){
+
+    initLibs();
+    selectPhysicalDevice();
     //Create a logical device
     vk::DeviceQueueCreateInfo queueCreateInfo;
-    queueCreateInfo.queueFamilyIndex = queueFamilyInfo.graphicsFamily.value();
+    queueCreateInfo.queueFamilyIndex = physicalDeviceInfo.queueFamilyInfo.graphicsFamily.value();
     queueCreateInfo.queueCount = 1;
-    queueCreateInfo.pQueuePriorities = &queueFamilyInfo.graphicsFamilyPriority;
+    queueCreateInfo.pQueuePriorities = &physicalDeviceInfo.queueFamilyInfo.graphicsFamilyPriority;
     vk::PhysicalDeviceFeatures deviceFeatures;
     vk::DeviceCreateInfo deviceCreateInfo;
     deviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;
     deviceCreateInfo.queueCreateInfoCount = 1;
     deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
-    deviceCreateInfo.enabledExtensionCount = 0;
-#ifdef USEVALIDLAYERS //For backwards compatability
+    deviceCreateInfo.enabledExtensionCount = requiredDeviceExtensions.size();
+    deviceCreateInfo.ppEnabledExtensionNames = requiredDeviceExtensions.data();
+#ifdef USE_VALIDATION_LAYERS //For backwards compatability
     deviceCreateInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
     deviceCreateInfo.ppEnabledLayerNames = validationLayers.data();
 #else
     deviceCreateInfo.enabledLayerCount = 0;
 #endif
-    logicalDevice = physicalDevice.createDevice(deviceCreateInfo);
-    graphicsQueue = logicalDevice.getQueue(queueFamilyInfo.graphicsFamily.value(), 0);
-
+    logicalDevice = physicalDeviceInfo.physicalDevice.createDevice(deviceCreateInfo);
+    graphicsQueue = logicalDevice.getQueue(physicalDeviceInfo.queueFamilyInfo.graphicsFamily.value(), 0);
 }
 
 Application::~Application(){
