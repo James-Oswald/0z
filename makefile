@@ -16,14 +16,14 @@ else
 	LDFLAGS += -lvulkan
 endif
 INCLUDES=-Iinclude
-SOURCES=$(wildcard *.cpp)
-OBJECTS=$(SOURCES:%.cpp=./bin/%.o)
+SOURCES=$(wildcard ./src/*.cpp)
+OBJECTS=$(SOURCES:./src/%.cpp=./bin/%.o)
 
 all : $(OBJECTS)
 	$(CC) $(CXXFLAGS) -o ./bin/main.exe $? $(LDFLAGS)
 
-./bin/%.o : %.cpp ./include/vkfw.hpp.gch
-	$(CC) $(CXXFLAGS) -c -o $@ $< $(INCLUDES) 
+./bin/%.o : ./src/%.cpp ./include/vkfw.hpp.gch
+	$(CC) $(CXXFLAGS) -c -o $@ $< $(INCLUDES)
 
 ./include/vkfw.hpp.gch : ./include/vkfw.hpp
 	$(CC) $(CXXFLAGS) $<
