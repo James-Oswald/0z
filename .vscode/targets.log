@@ -3,19 +3,18 @@ make.exe all --print-data-base --no-builtin-variables --no-builtin-rules --quest
 # Built for x86_64-pc-msys
 # Copyright (C) 1988-2020 Free Software Foundation, Inc.
 # License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
- 
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
  
 
-# Make data base, printed on Wed Dec 15 18:30:00 2021
+ 
+# Make data base, printed on Wed Dec 15 20:02:33 2021
 
 # Variables
 
 # environment
 FPS_BROWSER_APP_PROFILE_STRING = Internet Explorer
 # environment
- 
 SYSTEMDRIVE = C:
 # environment
 JAVA_HOME = D:\Programming\JavaVersions\jdk-15.0.2\bin
@@ -98,11 +97,14 @@ COMMONPROGRAMW6432 = C:\Program Files\Common Files
 # automatic
 +D = $(patsubst %/,%,$(dir $+))
 # makefile (from 'makefile', line 1)
+ 
 MAKEFILE_LIST := makefile
 # automatic
 @F = $(notdir $@)
+ 
 # environment
 VSCODE_VERBOSE_LOGGING = true
+ 
 # environment
 VSCODE_PID = 3720
 # environment
@@ -163,22 +165,26 @@ VSCODE_LOG_NATIVE = false
 USERNAME = James
 # environment
 COMMONPROGRAMFILES = C:\Program Files\Common Files
- 
 # automatic
 ?F = $(notdir $?)
 # environment
 PROGRAMW6432 = C:\Program Files
+ 
 # environment
 PATHEXT = .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
 # automatic
 +F = $(notdir $+)
+ 
 # environment
+ 
 ORIGINAL_XDG_CURRENT_DESKTOP = undefined
+ 
 # makefile (from 'makefile', line 20)
 OBJECTS = $(SOURCES:%.cpp=./bin/%.o)
 # environment
 USERDOMAIN = JAMESOSWALDPC
 # 'override' directive
+ 
 GNUMAKEFLAGS := 
 # environment
 OS = Windows_NT
@@ -257,13 +263,14 @@ PROCESSOR_IDENTIFIER = Intel64 Family 6 Model 158 Stepping 10, GenuineIntel
 
 # include (device 583634660, inode 844424931286697): No files, no impossibilities so far.
 # . (device 583634660, inode 281474977834679): 12 files, no impossibilities.
+ 
 
 # 12 files, no impossibilities in 2 directories.
 
+ 
 # Implicit Rules
 
 bin/%.o: %.cpp include/vkfw.hpp.gch
- 
 #  recipe to execute (from 'makefile', line 26):
 	$(CC) $(CXXFLAGS) -c -o $@ $< $(INCLUDES) 
 
@@ -280,7 +287,7 @@ include/vkfw.hpp:
 bin/main.o: main.cpp include/vkfw.hpp.gch
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'main'
-#  Last modified 2021-12-15 07:18:44.7271333
+#  Last modified 2021-12-15 18:50:34.03531
 #  File has been updated.
 #  Needs to be updated (-q is set).
 # automatic
@@ -306,6 +313,7 @@ bin/main.o: main.cpp include/vkfw.hpp.gch
 
 include/vkfw.hpp.gch: include/vkfw.hpp
 #  Implicit rule search has not been done.
+ 
 #  Last modified 2021-12-15 04:28:55.3671946
 #  File has been updated.
 #  Successfully updated.
@@ -332,7 +340,7 @@ all: bin/main.o bin/settings.o
 # Not a target:
 main.cpp:
 #  Implicit rule search has been done.
-#  Last modified 2021-12-15 07:22:26.0404182
+#  Last modified 2021-12-15 20:02:33.5596899
 #  File has been updated.
 #  Successfully updated.
 
@@ -345,14 +353,13 @@ bin/settings.o:
 # Not a target:
 makefile:
 #  Implicit rule search has been done.
-#  Last modified 2021-12-15 07:43:53.859541
+#  Last modified 2021-12-15 20:02:24.0556129
 #  File has been updated.
 #  Successfully updated.
 
 # files hash-table stats:
 # Load=9/1024=1%, Rehash=0, Collisions=0/28=0%
 # VPATH Search Paths
- 
 
 # No 'vpath' search paths.
 
@@ -364,6 +371,6 @@ makefile:
 # strcache performance: lookups = 36 / hit rate = 36%
 # hash-table stats:
 # Load=23/8192=0%, Rehash=0, Collisions=0/36=0%
-# Finished Make data base on Wed Dec 15 18:30:00 2021
+# Finished Make data base on Wed Dec 15 20:02:33 2021
 
  

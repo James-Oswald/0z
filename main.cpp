@@ -8,7 +8,6 @@
 #include<cstdlib>
 #endif
 
-
 #ifdef LOG
 #include<iostream>
 #endif
@@ -19,17 +18,13 @@
 #include<string>
 #include<optional>
 
-
-
-/*QueueFamilyIndices::QueueFamilyIndices(std::optional<uint32_t> graphicsFamily_)
-:graphicsFamily(graphicsFamily_)
-{}*/
-
 class Application{
     private:
         static void glfwErrorCallback(int, const char*);
         void initLibs();
         void selectPhysicalDevice();
+        void createLogicalDevice();
+        void createSwapChain();
 #ifdef USE_VALIDATION_LAYERS        
         const std::vector<const char*> validationLayers = {"VK_LAYER_KHRONOS_validation"};
 #endif
@@ -49,19 +44,20 @@ class Application{
         struct PhysicalDeviceInfo{ //Holds information about physical devices
             vk::PhysicalDevice physicalDevice;
             QueueFamilyInfo queueFamilyInfo;
-            SwapChainInfo SwapChainInfo;
+            SwapChainInfo swapChainInfo;
             std::vector<vk::ExtensionProperties> extensionProps;
         };
 
         vkfw::Window window;
         vk::Instance instance;
-        vk::ApplicationInfo appInfo;
-        vk::InstanceCreateInfo createInfo;
         std::vector<PhysicalDeviceInfo> physicalDevices; //All Physical Devices
         PhysicalDeviceInfo physicalDeviceInfo;           //A the selected physical device this app is running on.
         vk::Device logicalDevice;
         vk::Queue graphicsQueue;
         vk::SurfaceKHR surface;
+        vk::SurfaceFormatKHR surfaceFormat;
+        vk::PresentModeKHR presentMode;
+        vk::Extent2D swapExtent;
 
         Application();
         ~Application();
@@ -111,12 +107,14 @@ void Application::initLibs(){
     window = vkfw::createWindow(800, 600, "0z", hints);
 
     //Vulkan Setup
+    vk::ApplicationInfo appInfo;
     appInfo = vk::ApplicationInfo();
     appInfo.pApplicationName = "Oz";
     appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
     appInfo.pEngineName = "No Engine";
     appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
     appInfo.apiVersion = VK_API_VERSION_1_0;
+    vk::InstanceCreateInfo createInfo;
     createInfo.pApplicationInfo = &appInfo;
     uint32_t glfwExtensionCount;
     const char** glfwExtensions = vkfw::getRequiredInstanceExtensions(&glfwExtensionCount);
@@ -182,7 +180,7 @@ void Application::selectPhysicalDevice(){
         for(int i = 0; i < queueFamProps.size(); i++){
             if(queueFamProps[i].queueFlags & vk::QueueFlagBits::eGraphics)
                 queueFamInfo.graphicsFamily = i;
-            else if(device.getSurfaceSupportKHR(i, surface))
+            if(device.getSurfaceSupportKHR(i, surface))
                 queueFamInfo.presentationFamily = i;
         }
         if(!(queueFamInfo.graphicsFamily.has_value() && queueFamInfo.presentationFamily.has_value()))
@@ -192,17 +190,17 @@ void Application::selectPhysicalDevice(){
         physicalDeviceInfo.physicalDevice = device;
         physicalDeviceInfo.extensionProps = availableExtensions;
         physicalDeviceInfo.queueFamilyInfo = queueFamInfo;
+        physicalDeviceInfo.swapChainInfo = swapChainInfo;
         physicalDevices.push_back(std::move(physicalDeviceInfo));
     }
     if(physicalDevices.size() == 0)
         throw std::runtime_error("Failed to find GPUs that meet criteria!");
+
+    //select first usable phsyical device
     physicalDeviceInfo = physicalDevices[0];
 }
 
-Application::Application(){
-
-    initLibs();
-    selectPhysicalDevice();
+void Application::createLogicalDevice(){
     //Create a logical device
     vk::DeviceQueueCreateInfo queueCreateInfo;
     queueCreateInfo.queueFamilyIndex = physicalDeviceInfo.queueFamilyInfo.graphicsFamily.value();
@@ -223,6 +221,62 @@ Application::Application(){
 #endif
     logicalDevice = physicalDeviceInfo.physicalDevice.createDevice(deviceCreateInfo);
     graphicsQueue = logicalDevice.getQueue(physicalDeviceInfo.queueFamilyInfo.graphicsFamily.value(), 0);
+}
+
+void Application::createSwapChain(){
+    surfaceFormat = physicalDeviceInfo.swapChainInfo.formats[0];   //default format
+    for(const auto& format : physicalDeviceInfo.swapChainInfo.formats) //find prefered format
+        if(format.format == vk::Format::eB8G8R8A8Srgb && format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear){
+            surfaceFormat = format;
+            break;
+        }
+    presentMode = vk::PresentModeKHR::eFifo; //default present mode
+    for(const auto& mode : physicalDeviceInfo.swapChainInfo.presentModes)
+        if(mode == vk::PresentModeKHR::eMailbox){
+            presentMode = mode;
+            break;
+        }
+    vk::SurfaceCapabilitiesKHR& capabilities = physicalDeviceInfo.swapChainInfo.capabilities;
+    if(capabilities.currentExtent.width != UINT32_MAX)
+        swapExtent = capabilities.currentExtent;
+    else{
+        size_t width, height;
+        window.getFramebufferSize(&width, &height);
+        vk::Extent2D extent{};
+        extent.width = std::clamp((uint32_t)width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
+        extent.height = std::clamp((uint32_t)height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
+        swapExtent = extent;
+    }
+    uint32_t imageCount = capabilities.minImageCount + 1;
+    if(capabilities.maxImageCount > 0 && imageCount > capabilities.maxImageCount)
+        imageCount = capabilities.maxImageCount;
+    vk::SwapchainCreateInfoKHR creationInfo;
+    creationInfo.surface = surface;
+    creationInfo.minImageCount = imageCount;
+    creationInfo.imageFormat = surfaceFormat.format;
+    creationInfo.imageColorSpace = surfaceFormat.colorSpace;
+    creationInfo.imageExtent = swapExtent;
+    creationInfo.imageArrayLayers = 1; //Images are flat lmao
+    creationInfo.imageUsage = vk::ImageUsageFlagBits::eColorAttachment; //Render directly to images in swap chain, no post processing
+    QueueFamilyInfo& queueFamInf = physicalDeviceInfo.queueFamilyInfo;
+    if(queueFamInf.presentationFamily == queueFamInf.graphicsFamily){
+        creationInfo.imageSharingMode = vk::SharingMode::eExclusive; //The better one
+        creationInfo.queueFamilyIndexCount = 0;
+        creationInfo.pQueueFamilyIndices = nullptr;
+    }else{
+        uint32_t queueFamilyIndices[] = {queueFamInf.graphicsFamily.value(), queueFamInf.presentationFamily.value()};
+        creationInfo.imageSharingMode = vk::SharingMode::eConcurrent;
+        creationInfo.queueFamilyIndexCount = 2;
+        creationInfo.pQueueFamilyIndices = queueFamilyIndices;
+    }
+}
+
+Application::Application(){
+
+    initLibs();
+    selectPhysicalDevice();
+    createLogicalDevice();
+    createSwapChain();
 }
 
 Application::~Application(){
