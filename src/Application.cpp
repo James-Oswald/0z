@@ -8,9 +8,6 @@
 #include<cstdlib>
 #endif
 
-#ifdef LOG
-#include<iostream>
-#endif
 
 #include<set>
 #include<cstdint>
@@ -228,7 +225,7 @@ void Application::createSwapChain(){
 }
 
 Application::Application(){
-
+    initSubsystems();
     initLibs();
     selectPhysicalDevice();
     createLogicalDevice();

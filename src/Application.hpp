@@ -1,20 +1,23 @@
-
-#include<vkfw.hpp>
-
 #pragma once
+
+#include"Application.hpp"
+#include"ApplicationSubsystem.hpp"
+#include<vkfw.hpp>
 #include<vector>
+
 
 class Application{
     private:
+        std::vector<ApplicationSubsystem*> subsystems;
+        std::vector<const char*> requiredLayers = {"VK_LAYER_KHRONOS_validation"};
+        std::vector<const char*> requiredDeviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+
         static void glfwErrorCallback(int, const char*);
+        void initSubsystems();
         void initLibs();
         void selectPhysicalDevice();
         void createLogicalDevice();
         void createSwapChain();
-#ifdef USE_VALIDATION_LAYERS        
-        const std::vector<const char*> validationLayers = {"VK_LAYER_KHRONOS_validation"};
-#endif
-        const std::vector<const char*> requiredDeviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
     public:
         struct QueueFamilyInfo{
             float graphicsFamilyPriority = 1;
@@ -38,7 +41,7 @@ class Application{
         vk::Instance instance;
         std::vector<PhysicalDeviceInfo> physicalDevices; //All Physical Devices
         PhysicalDeviceInfo physicalDeviceInfo;           //A the selected physical device this app is running on.
-        vk::Device logicalDevice;
+        vk::Device logicalDevice; 
         vk::Queue graphicsQueue;
         vk::SurfaceKHR surface;
         vk::SurfaceFormatKHR surfaceFormat;
@@ -47,6 +50,7 @@ class Application{
 
         Application();
         ~Application();
+        void init();
         void mainLoop();
 };
 
