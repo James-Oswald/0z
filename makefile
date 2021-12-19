@@ -5,8 +5,8 @@
 
 
 CC= g++
-CXXFLAGS= -g -O3 -std=c++2a
-LDFLAGS=-Llib -lglfw3 -lgdi32
+CXXFLAGS= -g -std=c++2a
+LDFLAGS= -Llib -lglfw3 -lgdi32 -lboost_filesystem-mt
 #Bug that forces you to link against Vulkan SDKs vulkan-1 dll rather than msys's
 #https://github.com/glfw/glfw/issues/1900
 #https://github.com/msys2/MINGW-packages/issues/5812
@@ -18,12 +18,27 @@ endif
 INCLUDES=-Iinclude
 SOURCES=$(wildcard ./src/*.cpp)
 OBJECTS=$(SOURCES:./src/%.cpp=./bin/%.o)
+LAYERSRCS=$(wildcard ./lib/VkLayer*)
+LAYERDEST=$(LAYERSRCS:./lib/%=./bin/layers/%)
 
-all : $(OBJECTS)
-	$(CC) $(CXXFLAGS) -o ./bin/main.exe $? $(LDFLAGS)
+all : $(OBJECTS) $(LAYERDEST) ./bin/config.json
+	$(CC) $(CXXFLAGS) -o ./bin/main.exe $(OBJECTS) $(LDFLAGS)
 
-./bin/%.o : ./src/%.cpp ./include/vkfw.hpp.gch
+./bin/%.o : ./src/%.cpp ./include/master.hpp.gch ./src/Utils.hpp
 	$(CC) $(CXXFLAGS) -c -o $@ $< $(INCLUDES)
 
-./include/vkfw.hpp.gch : ./include/vkfw.hpp
-	$(CC) $(CXXFLAGS) $<
+./bin/layers/VkLayer% : ./lib/VkLayer%
+	cp $< $@
+
+./bin/config.json : ./src/config.json
+	cp $< $@
+
+./include/master.hpp.gch : ./include/master.hpp ./include/vkfw.hpp
+	$(CC) $(CXXFLAGS) $< $(INCLUDES)
+
+setup:
+	mkdir -p ./bin
+	mkdir -p ./bin/layers
+
+clean:
+	rm ./bin/*.o

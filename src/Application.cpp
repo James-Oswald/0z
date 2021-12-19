@@ -1,14 +1,12 @@
 //Put this first to utilize the precompiled vkfw.hpp.gch header
+#include<master.hpp> //precomiled 
 #include<vkfw.hpp>
+#include<boost/property_tree/ptree.hpp> //For the json config file
+#include<boost/property_tree/json_parser.hpp>
+#include<boost/dll/runtime_symbol_info.hpp>
+#include<boost/filesystem.hpp>
 
-#define LOG
-#define USE_VALIDATION_LAYERS
-
-#ifdef USE_VALIDATION_LAYERS
 #include<cstdlib>
-#endif
-
-
 #include<set>
 #include<cstdint>
 #include<vector>
@@ -16,69 +14,108 @@
 #include<optional>
 
 #include"Application.hpp"
+#include"Utils.hpp"
 
 void Application::glfwErrorCallback(int errorCode, const char* error){
     throw std::runtime_error(std::string("GLFW encountered an error!\n ") + error + "\n");
 }
 
-void Application::initLibs(){
-    //Validation Layer Setup
-#ifdef USE_VALIDATION_LAYERS
-    putenv("VK_LAYER_PATH=D:\\Software\\VulkanSDK\\Bin");
-    putenv("VK_INSTANCE_LAYERS=\"VK_LAYER_LUNARG_api_dump;VK_LAYER_KHRONOS_validation\"");
-    std::vector<vk::LayerProperties> availableLayers = vk::enumerateInstanceLayerProperties();
-#ifdef LOG
-    std::cout<<"Available Layers"<<"\n";
-    for(const auto& layer : availableLayers)
-        std::cout<<"\t"<< layer.layerName<<"\n";
-#endif
-    for(const char* layerName : validationLayers){
-        bool layerFound = false;
-        for(const auto& layerProperties : availableLayers)
-            if (strcmp(layerName, layerProperties.layerName)==0){
-                layerFound = true;
+template <typename T>
+std::vector<T> Application::getVecProp(const boost::property_tree::ptree& pt, boost::property_tree::ptree::key_type const& key)
+{
+    std::vector<T> rv;
+    for (auto& item : pt.get_child(key))
+        rv.push_back(item.second.get_value<T>());
+    return rv;
+}
+
+void Application::verifyRequired(std::string name, std::vector<std::string> available, std::vector<std::string> requested){
+    logger([&name, &available, &requested](auto concat){
+        concat("\nAvailable " + name + "s:\n");
+        for(const std::string& a : available)
+            concat("\t"+a+"\n");
+        concat("Requested " + name + "s:\n");
+        for(const std::string& r : requested)
+            concat("\t"+r+"\n");
+    });
+    for(const std::string& r : requested){
+        bool found = false;
+        for(const std::string& a : available) //linear search
+            if(r==a){
+                found = true;
                 break;
             }
-        if (!layerFound)
-            throw std::runtime_error(std::string("Debug Layer ")+layerName+" was requested but not found");
+        if (!found){
+            logger(Logger::Level::Error, name + ": " + r + " was requested but not found!");
+            throw std::runtime_error(r + " was requested but not found!");
+        }
     }
-#endif
+    logger(Logger::Level::Success, "All requested " + name + "s were found.");
+}
 
-#ifdef LOG
-    //Log available vulkan extensions
-    std::vector<vk::ExtensionProperties> extensions = vk::enumerateInstanceExtensionProperties();
-    std::cout<<"Available Extensions"<<"\n";
-    for(const auto& extension : extensions)
-        std::cout<<"\t"<<extension.extensionName<<"\n";
-#endif
+void Application::configure(){
+    boost::filesystem::path programLocation = boost::dll::program_location().parent_path();
+    boost::filesystem::current_path(programLocation);
+    boost::property_tree::read_json(configFilePath, staticConfigTree);
+    applicationName = staticConfigTree.get<std::string>("name");
+    layerPath = staticConfigTree.get<std::string>("vkLayerPath");
+    requiredVkLayers = getVecProp<std::string>(staticConfigTree, "vkLayers");
+    requiredVkInstanceExtensions = getVecProp<std::string>(staticConfigTree, "vkInstanceExtensions");
+    requiredVkDeviceExtensions = getVecProp<std::string>(staticConfigTree, "vkDeviceExtensions");
+}
 
+void Application::initLibs(){
     //Window Setup
     vkfw::setErrorCallback(&glfwErrorCallback);
     vkfw::init();
     vkfw::WindowHints hints {};
     hints.clientAPI = vkfw::ClientAPI::eNone;
-    window = vkfw::createWindow(800, 600, "0z", hints);
+    window = vkfw::createWindow(800, 600, applicationName.c_str(), hints);
+
+    //Vulkan Layer Env Setup, this must be done before the enumerateInstanceLayerProperties call.
+    std::string layerPathEnv = "VK_LAYER_PATH=" + layerPath;
+    putenv(layerPathEnv.c_str());
+    std::string layersEnv = "VK_INSTANCE_LAYERS=\"";
+    for(const auto& layer : requiredVkLayers)
+        layersEnv += layer + ';';
+    layersEnv.pop_back(); //remove the final ";"
+    layersEnv += "\"";
+    putenv(layersEnv.c_str());
+
+    //Layer Logging
+    std::vector<vk::LayerProperties> availableLayers = vk::enumerateInstanceLayerProperties();
+    std::vector<std::string> availableLayerNames = oz::map<vk::LayerProperties, std::string>(availableLayers, [](vk::LayerProperties l){return (std::string)l.layerName;});
+    verifyRequired("Layer", availableLayerNames, requiredVkLayers);
+    std::vector<const char*> finalLayers = oz::toCCPVec(requiredVkLayers);
+    logger(oz::vecToString(requiredVkLayers));
+    logger(oz::vecToString(finalLayers));
+
+    //Vulkan instance extensions
+    std::vector<vk::ExtensionProperties> availableExtensions = vk::enumerateInstanceExtensionProperties();
+    std::vector<std::string> availableExtensionNames = oz::map<vk::ExtensionProperties, std::string>(availableExtensions, [](vk::ExtensionProperties l){return (std::string)l.extensionName;});
+    std::span<const char*> glfwExtensions = vkfw::getRequiredInstanceExtensions();
+    for(const char* extension : glfwExtensions)
+        requiredVkInstanceExtensions.push_back(extension);
+    verifyRequired("Instance Extension", availableExtensionNames, requiredVkInstanceExtensions);
+    std::vector<const char*> finalExtensions = oz::toCCPVec(requiredVkInstanceExtensions);
+    logger(oz::vecToString(requiredVkInstanceExtensions));
+    logger(oz::vecToString(finalExtensions));
 
     //Vulkan Setup
     vk::ApplicationInfo appInfo;
     appInfo = vk::ApplicationInfo();
-    appInfo.pApplicationName = "Oz";
-    appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+    appInfo.pApplicationName = applicationName.c_str();
+    appInfo.applicationVersion = VK_MAKE_API_VERSION(0, 1, 0, 0);
     appInfo.pEngineName = "No Engine";
-    appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+    appInfo.engineVersion = VK_MAKE_API_VERSION(0, 1, 0, 0);
     appInfo.apiVersion = VK_API_VERSION_1_0;
     vk::InstanceCreateInfo createInfo;
     createInfo.pApplicationInfo = &appInfo;
-    uint32_t glfwExtensionCount;
-    const char** glfwExtensions = vkfw::getRequiredInstanceExtensions(&glfwExtensionCount);
-    createInfo.enabledExtensionCount = glfwExtensionCount;
-    createInfo.ppEnabledExtensionNames = glfwExtensions;
-#ifdef USE_VALIDATION_LAYERS
-    createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
-    createInfo.ppEnabledLayerNames = validationLayers.data();
-#else
-    createInfo.enabledLayerCount = 0;
-#endif
+    createInfo.enabledExtensionCount = finalExtensions.size();
+    createInfo.ppEnabledExtensionNames = finalExtensions.data();
+    createInfo.enabledLayerCount = finalLayers.size();
+    createInfo.ppEnabledLayerNames = finalLayers.data();
+
     vk::Result createInstanceResult = vk::createInstance(&createInfo, nullptr, &instance);
     if(createInstanceResult != vk::Result::eSuccess)
         throw std::runtime_error(std::string("VK Instance creation failed with code") + std::to_string((int)createInstanceResult));
@@ -92,28 +129,25 @@ void Application::selectPhysicalDevice(){
     std::vector<vk::PhysicalDevice> allPhysicalDevices = instance.enumeratePhysicalDevices(); //All available graphics hardware
     if (allPhysicalDevices.size()==0) 
         throw std::runtime_error("Failed to find GPUs with Vulkan support!");
-#ifdef LOG
-    std::cout<<"Available Physical Graphics Hardware"<<"\n";
-    for(const vk::PhysicalDevice& device : allPhysicalDevices){
-        vk::PhysicalDeviceProperties props = device.getProperties();
-        std::cout<<"\t"<<props.deviceName<<"\n";
-        std::cout<<"\t\t"<<props.apiVersion<<"\n";
-        std::cout<<"\t\t"<<props.driverVersion<<"\n";
-        std::cout<<"\t\t"<<(int)props.deviceType<<"\n";
-    }
-#endif
+    logger([&allPhysicalDevices](auto concat){
+        concat("Available Physical Graphics Hardware\n");
+        for(const vk::PhysicalDevice& device : allPhysicalDevices){
+            vk::PhysicalDeviceProperties props = device.getProperties();
+            concat("\t" + (std::string)props.deviceName + "\n");
+        }
+    });
+    
     //Select GPUs based on desired features that are available
     for(const vk::PhysicalDevice& device : allPhysicalDevices){
-
         //We only allow discrte GPUs cause we're too cool for IG
         vk::PhysicalDeviceProperties deviceProps = device.getProperties();
         if(deviceProps.deviceType != vk::PhysicalDeviceType::eDiscreteGpu)
             continue;
         
         std::vector<vk::ExtensionProperties> availableExtensions = device.enumerateDeviceExtensionProperties();
-        std::set<std::string> requiredExtensions(requiredDeviceExtensions.begin(), requiredDeviceExtensions.end());
+        std::set<std::string> requiredExtensions(requiredVkDeviceExtensions.begin(), requiredVkDeviceExtensions.end());
         for (const auto& extension : availableExtensions)
-            requiredExtensions.erase(extension.extensionName);
+            requiredExtensions.erase((std::string)extension.extensionName);
         if(!requiredExtensions.empty())
             continue;
 
@@ -155,6 +189,8 @@ void Application::selectPhysicalDevice(){
 
 void Application::createLogicalDevice(){
     //Create a logical device
+    std::vector<const char*> finalLayers = oz::toCCPVec(requiredVkLayers);
+    std::vector<const char*> finalDeviceExtenstions = oz::toCCPVec(requiredVkDeviceExtensions);
     vk::DeviceQueueCreateInfo queueCreateInfo;
     queueCreateInfo.queueFamilyIndex = physicalDeviceInfo.queueFamilyInfo.graphicsFamily.value();
     queueCreateInfo.queueCount = 1;
@@ -164,20 +200,16 @@ void Application::createLogicalDevice(){
     deviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;
     deviceCreateInfo.queueCreateInfoCount = 1;
     deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
-    deviceCreateInfo.enabledExtensionCount = requiredDeviceExtensions.size();
-    deviceCreateInfo.ppEnabledExtensionNames = requiredDeviceExtensions.data();
-#ifdef USE_VALIDATION_LAYERS //For backwards compatability
-    deviceCreateInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
-    deviceCreateInfo.ppEnabledLayerNames = validationLayers.data();
-#else
-    deviceCreateInfo.enabledLayerCount = 0;
-#endif
+    deviceCreateInfo.enabledExtensionCount = finalDeviceExtenstions.size();
+    deviceCreateInfo.ppEnabledExtensionNames = finalDeviceExtenstions.data();
+    deviceCreateInfo.enabledLayerCount = finalLayers.size();
+    deviceCreateInfo.ppEnabledLayerNames = finalLayers.data();
     logicalDevice = physicalDeviceInfo.physicalDevice.createDevice(deviceCreateInfo);
     graphicsQueue = logicalDevice.getQueue(physicalDeviceInfo.queueFamilyInfo.graphicsFamily.value(), 0);
 }
 
 void Application::createSwapChain(){
-    surfaceFormat = physicalDeviceInfo.swapChainInfo.formats[0];   //default format
+    surfaceFormat = physicalDeviceInfo.swapChainInfo.formats[0];       //default format
     for(const auto& format : physicalDeviceInfo.swapChainInfo.formats) //find prefered format
         if(format.format == vk::Format::eB8G8R8A8Srgb && format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear){
             surfaceFormat = format;
@@ -213,10 +245,12 @@ void Application::createSwapChain(){
     creationInfo.imageUsage = vk::ImageUsageFlagBits::eColorAttachment; //Render directly to images in swap chain, no post processing
     QueueFamilyInfo& queueFamInf = physicalDeviceInfo.queueFamilyInfo;
     if(queueFamInf.presentationFamily == queueFamInf.graphicsFamily){
+        logger(Logger::Level::Info, "Using image sharing exclusive mode (The good one)");
         creationInfo.imageSharingMode = vk::SharingMode::eExclusive; //The better one
         creationInfo.queueFamilyIndexCount = 0;
         creationInfo.pQueueFamilyIndices = nullptr;
     }else{
+        logger(Logger::Level::Warning, "Using image sharing shared mode (The slow one)");
         uint32_t queueFamilyIndices[] = {queueFamInf.graphicsFamily.value(), queueFamInf.presentationFamily.value()};
         creationInfo.imageSharingMode = vk::SharingMode::eConcurrent;
         creationInfo.queueFamilyIndexCount = 2;
@@ -224,8 +258,10 @@ void Application::createSwapChain(){
     }
 }
 
-Application::Application(){
-    initSubsystems();
+Application::Application(const std::string& configFilePath_ = "config.json")
+:configFilePath(configFilePath_)
+{
+    configure();
     initLibs();
     selectPhysicalDevice();
     createLogicalDevice();
@@ -246,7 +282,7 @@ void Application::mainLoop(){
     }
 }
 
-int main(){
+int main(int argc, char** argv){
     Application a;
     a.mainLoop();
     return 0;

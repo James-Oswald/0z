@@ -1,8 +1,5 @@
 
 //Base logger
-
-#include<vkfw.hpp>
-
 #pragma once
 
 #include<string>
@@ -13,9 +10,9 @@ class Logger{
         std::function<void(const std::string&)> logCallback;
         static void defaultLogCallback(const std::string&);
     public:
+        enum class Level{Success, Info, Warning, Error};
         Logger();
         Logger(std::function<void(const std::string&)>);
-        enum class Level{Info, Warning, Error}
         void operator()(Level, std::string);
         void operator()(Level, std::function<void(std::function<void(std::string)>)>);
         void operator()(std::string);

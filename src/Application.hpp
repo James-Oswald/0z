@@ -1,24 +1,41 @@
+#include<vkfw.hpp>
+
 #pragma once
 
-#include"Application.hpp"
-#include"ApplicationSubsystem.hpp"
-#include<vkfw.hpp>
+#include<boost/property_tree/ptree.hpp>
+#include<string>
 #include<vector>
 
+#include"Logger.hpp"
 
 class Application{
     private:
-        std::vector<ApplicationSubsystem*> subsystems;
-        std::vector<const char*> requiredLayers = {"VK_LAYER_KHRONOS_validation"};
-        std::vector<const char*> requiredDeviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+        //cringe static glfw callback
+        static void glfwErrorCallback(int errorCode, const char* errorMessage);    //callback for glfw errors
 
-        static void glfwErrorCallback(int, const char*);
-        void initSubsystems();
+        //helpers
+        void verifyRequired(std::string name, std::vector<std::string> available, std::vector<std::string> requested);
+        template<typename T> static std::vector<T> getVecProp(const boost::property_tree::ptree& tree, const boost::property_tree::ptree::key_type& vecPropName);
+        
+        //Main subsystems
+        Logger logger;
+
+        //Config properties
+        std::string configFilePath;
+        boost::property_tree::ptree staticConfigTree;
+        std::string applicationName;
+        std::string layerPath;
+        std::vector<std::string> requiredVkLayers;            //Required vulkan instance layers
+        std::vector<std::string> requiredVkInstanceExtensions; 
+        std::vector<std::string> requiredVkDeviceExtensions;  //Required logical device extensions
+
+        //Chunk Helpers
+        void configure();
         void initLibs();
         void selectPhysicalDevice();
         void createLogicalDevice();
         void createSwapChain();
-    public:
+    protected:
         struct QueueFamilyInfo{
             float graphicsFamilyPriority = 1;
             float presentationFamilyPriority = 1;
@@ -47,11 +64,12 @@ class Application{
         vk::SurfaceFormatKHR surfaceFormat;
         vk::PresentModeKHR presentMode;
         vk::Extent2D swapExtent;
-
-        Application();
+    
+    public:
+        Application(const std::string& configFilePath);
         ~Application();
         void init();
         void mainLoop();
 };
 
-int main();
+int main(int argc, char** argv);
