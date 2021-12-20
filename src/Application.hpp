@@ -1,7 +1,9 @@
-#include<vkfw.hpp>
-
 #pragma once
 
+#include<master.hpp>
+
+#include<vulkan/vulkan.h>
+#include<vkfw.hpp>
 #include<boost/property_tree/ptree.hpp>
 #include<string>
 #include<vector>
@@ -11,6 +13,7 @@
 class Application{
     private:
         //cringe static glfw callback
+        static VKAPI_ATTR VkBool32 VKAPI_CALL vulkanDebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData);
         static void glfwErrorCallback(int errorCode, const char* errorMessage);    //callback for glfw errors
 
         //helpers
@@ -24,6 +27,7 @@ class Application{
         std::string configFilePath;
         boost::property_tree::ptree staticConfigTree;
         std::string applicationName;
+        bool debug;
         std::string layerPath;
         std::vector<std::string> requiredVkLayers;            //Required vulkan instance layers
         std::vector<std::string> requiredVkInstanceExtensions; 
@@ -56,6 +60,7 @@ class Application{
 
         vkfw::Window window;
         vk::Instance instance;
+        vk::DebugUtilsMessengerEXT debugMessenger;
         std::vector<PhysicalDeviceInfo> physicalDevices; //All Physical Devices
         PhysicalDeviceInfo physicalDeviceInfo;           //A the selected physical device this app is running on.
         vk::Device logicalDevice; 

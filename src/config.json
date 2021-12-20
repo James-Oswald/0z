@@ -1,6 +1,7 @@
 {
     "name" : "0z Application",
     "vkLayerPath" : "./layers",
+    "vkDebug": true,
     "vkLayers" : ["VK_LAYER_KHRONOS_validation"],
     "vkInstanceExtensions" : ["VK_EXT_debug_utils"],
     "vkDeviceExtensions" : ["VK_KHR_swapchain"]

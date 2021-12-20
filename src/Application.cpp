@@ -16,12 +16,31 @@
 #include"Application.hpp"
 #include"Utils.hpp"
 
+VkBool32 Application::vulkanDebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData){
+    Application* self = (Application*)pUserData;
+    Logger::Level level;
+    switch(messageSeverity){
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
+            level = Logger::Level::Warning;
+            break;
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
+            level = Logger::Level::Error;
+            break;
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
+        default:
+            level = Logger::Level::Info;
+    }
+    self->logger(level, "\e[91m[VulkanDebug]\e[0m" + std::string(pCallbackData->pMessage));
+    return VK_FALSE;
+}
+
 void Application::glfwErrorCallback(int errorCode, const char* error){
     throw std::runtime_error(std::string("GLFW encountered an error!\n ") + error + "\n");
 }
 
 template <typename T>
-std::vector<T> Application::getVecProp(const boost::property_tree::ptree& pt, boost::property_tree::ptree::key_type const& key)
+std::vector<T> Application::getVecProp(const boost::property_tree::ptree& pt, const boost::property_tree::ptree::key_type& key)
 {
     std::vector<T> rv;
     for (auto& item : pt.get_child(key))
@@ -58,6 +77,7 @@ void Application::configure(){
     boost::filesystem::current_path(programLocation);
     boost::property_tree::read_json(configFilePath, staticConfigTree);
     applicationName = staticConfigTree.get<std::string>("name");
+    debug = staticConfigTree.get<bool>("vkDebug");
     layerPath = staticConfigTree.get<std::string>("vkLayerPath");
     requiredVkLayers = getVecProp<std::string>(staticConfigTree, "vkLayers");
     requiredVkInstanceExtensions = getVecProp<std::string>(staticConfigTree, "vkInstanceExtensions");
@@ -115,6 +135,16 @@ void Application::initLibs(){
     vk::Result createInstanceResult = vk::createInstance(&createInfo, nullptr, &instance);
     if(createInstanceResult != vk::Result::eSuccess)
         throw std::runtime_error(std::string("VK Instance creation failed with code") + std::to_string((int)createInstanceResult));
+    
+    vk::DispatchLoaderDynamic dynamicloader(instance, vkGetInstanceProcAddr);
+    vk::DebugUtilsMessengerCreateInfoEXT dbgCreateInfo{};
+    dbgCreateInfo.messageSeverity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eError | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning | vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo;
+    dbgCreateInfo.messageType = vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation;
+    dbgCreateInfo.pfnUserCallback = &vulkanDebugCallback;
+    dbgCreateInfo.pUserData = (void*)this;
+    debugMessenger = instance.createDebugUtilsMessengerEXT(dbgCreateInfo, nullptr, dynamicloader);
+    
+
     surface = vkfw::createWindowSurface(instance, window, nullptr);
     if(!(bool)surface)
         throw std::runtime_error("Failed to create surface");
