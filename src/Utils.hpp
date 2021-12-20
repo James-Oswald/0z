@@ -9,6 +9,7 @@ namespace oz{
     template<typename T, typename U> std::vector<U> map(const std::vector<T>& input, U (*applicator)(T));
     template<typename T, typename U> std::vector<U> smap(const std::vector<T>& input, U (*applicator)(const T&));
     std::vector<const char*> toCCPVec(const std::vector<std::string>& input);
+    std::string vecToTree(std::string root, std::vector<std::string> members);
 }
 
 #include "Utils.tpp"

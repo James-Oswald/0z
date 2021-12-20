@@ -14,8 +14,10 @@ class Logger{
         Logger();
         Logger(std::function<void(const std::string&)>);
         void operator()(Level, std::string);
+        //void operator()(Level, const std::string&);
         void operator()(Level, std::function<void(std::function<void(std::string)>)>);
         void operator()(std::string);
+        //void operator()(const std::string&);
         void operator()(std::function<void(std::function<void(std::string)>)>);
 };
 

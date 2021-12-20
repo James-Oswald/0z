@@ -16,22 +16,24 @@ Logger::Logger(std::function<void(const std::string&)> callback)
 {}
 
 void Logger::operator()(Level level, std::string message){
-    std::string logMessage = "";
+    std::string logMessage = "\n";
     switch(level){
         case Level::Success:
-            logMessage += "\n\e[1;92m[Success]\e[0m";
+            logMessage += "\e[1;92m[Success]\e[0m";
             break;
         case Level::Error:
-            logMessage += "\n\e[1;31m[Error]\e[0m";
+            logMessage += "\e[1;31m[Error]\e[0m";
             break;
         case Level::Warning:
-            logMessage += "\n\e[1;33m[Warning]\e[0m";
+            logMessage += "\e[1;33m[Warning]\e[0m";
             break;
         case Level::Info:
         default:
-            logMessage += "\n\e[1;34m[Info]\e[0m";
+            logMessage += "\e[1;34m[Info]\e[0m";
     }
-    logCallback(logMessage + " " + message);
+    std::string cleanedMessage = std::string(message.begin(), message.end() - (message[message.size()-1] == '\n' ? 1 : 0));  
+    logMessage += (cleanedMessage.find('\n') == std::string::npos ? " " : "\n") + cleanedMessage;
+    logCallback(logMessage);
 }
 
 void Logger::operator()(std::string message){

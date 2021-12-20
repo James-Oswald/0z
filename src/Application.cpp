@@ -31,7 +31,7 @@ VkBool32 Application::vulkanDebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT
         default:
             level = Logger::Level::Info;
     }
-    self->logger(level, "\e[91m[VulkanDebug]\e[0m" + std::string(pCallbackData->pMessage));
+    self->logger(level, "\e[91m[Vulkan Debug]\e[0m " + std::string(pCallbackData->pMessage));
     return VK_FALSE;
 }
 
@@ -50,12 +50,8 @@ std::vector<T> Application::getVecProp(const boost::property_tree::ptree& pt, co
 
 void Application::verifyRequired(std::string name, std::vector<std::string> available, std::vector<std::string> requested){
     logger([&name, &available, &requested](auto concat){
-        concat("\nAvailable " + name + "s:\n");
-        for(const std::string& a : available)
-            concat("\t"+a+"\n");
-        concat("Requested " + name + "s:\n");
-        for(const std::string& r : requested)
-            concat("\t"+r+"\n");
+        concat(oz::vecToTree("Available "+name+"s" , available));
+        concat(oz::vecToTree("Requested "+name+"s" , available));
     });
     for(const std::string& r : requested){
         bool found = false;
@@ -136,15 +132,18 @@ void Application::initLibs(){
     if(createInstanceResult != vk::Result::eSuccess)
         throw std::runtime_error(std::string("VK Instance creation failed with code") + std::to_string((int)createInstanceResult));
     
-    vk::DispatchLoaderDynamic dynamicloader(instance, vkGetInstanceProcAddr);
-    vk::DebugUtilsMessengerCreateInfoEXT dbgCreateInfo{};
-    dbgCreateInfo.messageSeverity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eError | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning | vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo;
-    dbgCreateInfo.messageType = vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation;
-    dbgCreateInfo.pfnUserCallback = &vulkanDebugCallback;
-    dbgCreateInfo.pUserData = (void*)this;
-    debugMessenger = instance.createDebugUtilsMessengerEXT(dbgCreateInfo, nullptr, dynamicloader);
+    //Dynamic Dispatcher to load extensions
+    dynamicloader.init(instance, vkGetInstanceProcAddr);
     
-
+    if(debug){
+        vk::DebugUtilsMessengerCreateInfoEXT dbgCreateInfo{};
+        dbgCreateInfo.messageSeverity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eError | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning | vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo;
+        dbgCreateInfo.messageType = vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation;
+        dbgCreateInfo.pfnUserCallback = &vulkanDebugCallback;
+        dbgCreateInfo.pUserData = (void*)this;
+        debugMessenger = instance.createDebugUtilsMessengerEXT(dbgCreateInfo, nullptr, dynamicloader);
+    }
+    
     surface = vkfw::createWindowSurface(instance, window, nullptr);
     if(!(bool)surface)
         throw std::runtime_error("Failed to create surface");
@@ -156,13 +155,10 @@ void Application::selectPhysicalDevice(){
     if (allPhysicalDevices.size()==0) 
         throw std::runtime_error("Failed to find GPUs with Vulkan support!");
     logger([&allPhysicalDevices](auto concat){
-        concat("Available Physical Graphics Hardware\n");
-        for(const vk::PhysicalDevice& device : allPhysicalDevices){
-            vk::PhysicalDeviceProperties props = device.getProperties();
-            concat("\t" + (std::string)props.deviceName + "\n");
-        }
+        std::vector<std::string> physicalDeviceNames = oz::map<vk::PhysicalDevice, std::string>(allPhysicalDevices,
+            [](const vk::PhysicalDevice& d){return (std::string)d.getProperties().deviceName;});
+        concat(oz::vecToTree("All Physical Graphics Hardware", physicalDeviceNames));
     });
-    
     //Select GPUs based on desired features that are available
     for(const vk::PhysicalDevice& device : allPhysicalDevices){
         //We only allow discrte GPUs cause we're too cool for IG
@@ -208,7 +204,11 @@ void Application::selectPhysicalDevice(){
     }
     if(physicalDevices.size() == 0)
         throw std::runtime_error("Failed to find GPUs that meet criteria!");
-
+    logger([this](auto concat){
+        std::vector<std::string> physicalDeviceNames = oz::map<PhysicalDeviceInfo, std::string>(physicalDevices,
+            [](const PhysicalDeviceInfo& d){return (std::string)d.physicalDevice.getProperties().deviceName;});
+        concat(oz::vecToTree("Suitable Physical Graphics Hardware", physicalDeviceNames));
+    });
     //select first usable phsyical device
     physicalDeviceInfo = physicalDevices[0];
 }
@@ -297,6 +297,8 @@ Application::Application(const std::string& configFilePath_ = "config.json")
 Application::~Application(){
     logicalDevice.destroy();
     instance.destroySurfaceKHR(surface);
+    if(debug)
+        instance.destroyDebugUtilsMessengerEXT(debugMessenger, nullptr, dynamicloader);
     instance.destroy();
     window.destroy();
     vkfw::terminate();

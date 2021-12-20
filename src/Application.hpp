@@ -59,6 +59,7 @@ class Application{
         };
 
         vkfw::Window window;
+        vk::DispatchLoaderDynamic dynamicloader;
         vk::Instance instance;
         vk::DebugUtilsMessengerEXT debugMessenger;
         std::vector<PhysicalDeviceInfo> physicalDevices; //All Physical Devices

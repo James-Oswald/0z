@@ -85,7 +85,8 @@
         "typeindex": "cpp",
         "variant": "cpp",
         "codecvt": "cpp",
-        "*.tpp": "cpp"
+        "*.tpp": "cpp",
+        "cfenv": "cpp"
     },
     "discord.enabled": true,
     "makefile.saveBeforeBuildOrConfigure": true,
