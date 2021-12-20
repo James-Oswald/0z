@@ -87,5 +87,13 @@
         "codecvt": "cpp",
         "*.tpp": "cpp"
     },
-    "discord.enabled": true
+    "discord.enabled": true,
+    "makefile.saveBeforeBuildOrConfigure": true,
+    "makefile.buildBeforeLaunch": false,
+    "makefile.configurations": [
+        {
+            "name": "multi-process-build",
+            "makeArgs": ["-j6"]
+        }
+    ]   
 }

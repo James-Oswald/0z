@@ -5,9 +5,6 @@
 
 namespace oz{
     std::vector<const char*> toCCPVec(const std::vector<std::string>& input){
-        std::vector<const char*> rv;
-        for(const std::string& s : input)
-            rv.push_back(s.c_str());
-        return rv;
+        return oz::map<std::string, const char*>(input, [](const std::string& s){return s.c_str();});
     }
 }
