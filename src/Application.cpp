@@ -87,8 +87,6 @@ void Application::initLibs(){
     std::vector<std::string> availableLayerNames = oz::map<vk::LayerProperties, std::string>(availableLayers, [](vk::LayerProperties l){return (std::string)l.layerName;});
     verifyRequired("Layer", availableLayerNames, requiredVkLayers);
     std::vector<const char*> finalLayers = oz::toCCPVec(requiredVkLayers);
-    logger(oz::vecToString(requiredVkLayers));
-    logger(oz::vecToString(finalLayers));
 
     //Vulkan instance extensions
     std::vector<vk::ExtensionProperties> availableExtensions = vk::enumerateInstanceExtensionProperties();
@@ -98,8 +96,6 @@ void Application::initLibs(){
         requiredVkInstanceExtensions.push_back(extension);
     verifyRequired("Instance Extension", availableExtensionNames, requiredVkInstanceExtensions);
     std::vector<const char*> finalExtensions = oz::toCCPVec(requiredVkInstanceExtensions);
-    logger(oz::vecToString(requiredVkInstanceExtensions));
-    logger(oz::vecToString(finalExtensions));
 
     //Vulkan Setup
     vk::ApplicationInfo appInfo;
@@ -245,7 +241,7 @@ void Application::createSwapChain(){
     creationInfo.imageUsage = vk::ImageUsageFlagBits::eColorAttachment; //Render directly to images in swap chain, no post processing
     QueueFamilyInfo& queueFamInf = physicalDeviceInfo.queueFamilyInfo;
     if(queueFamInf.presentationFamily == queueFamInf.graphicsFamily){
-        logger(Logger::Level::Info, "Using image sharing exclusive mode (The good one)");
+        logger(Logger::Level::Success, "Using image sharing exclusive mode (The good one)");
         creationInfo.imageSharingMode = vk::SharingMode::eExclusive; //The better one
         creationInfo.queueFamilyIndexCount = 0;
         creationInfo.pQueueFamilyIndices = nullptr;
