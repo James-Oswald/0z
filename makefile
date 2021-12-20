@@ -2,8 +2,6 @@
 #https://gist.github.com/reecer/11065346
 #https://www.gnu.org/software/make/manual/html_node/Automatic-Variables.html
 
-
-
 CC= g++
 CXXFLAGS= -g -std=c++2a -H
 LOGGING= > ./logs/$(@F).log 2>&1
@@ -21,11 +19,11 @@ SOURCES=$(wildcard ./src/*.cpp)
 OBJECTS=$(SOURCES:./src/%.cpp=./bin/%.o)
 LAYERSRCS=$(wildcard ./lib/VkLayer*)
 LAYERDEST=$(LAYERSRCS:./lib/%=./bin/layers/%)
-HEADERS=$(wildcard ./include/*.h)
-COMPHEADERS=$(LAYERSRCS:./lib/%=./bin/layers/%)
+HEADERS=$(wildcard ./include/*.hpp)
+COMPHEADERS=$(HEADERS:./include/%.hpp=./include/*.hpp.gch)
 
 all : $(OBJECTS) $(LAYERDEST) ./bin/config.json 
-	$(CC) $(CXXFLAGS) -o ./bin/main.exe $(OBJECTS) $(LDFLAGS) $(LOGGING)
+	$(CC) $(CXXFLAGS) -o ./bin/main.exe $(OBJECTS) $(LDFLAGS)
 
 ./bin/%.o : ./src/%.cpp ./src/%.hpp ./src/%.tpp $(COMPHEADERS)
 	$(CC) $(CXXFLAGS) -c -o $@ $< $(INCLUDES) $(LOGGING)
@@ -36,8 +34,8 @@ all : $(OBJECTS) $(LAYERDEST) ./bin/config.json
 ./bin/%.o : ./src/%.cpp $(COMPHEADERS)
 	$(CC) $(CXXFLAGS) -c -o $@ $< $(INCLUDES) $(LOGGING)
 
-./include/%.gch : ./include/%.hpp
-	$(CC) $(CXXFLAGS) $< $(INCLUDES)
+./include/%.hpp.gch : ./include/%.hpp
+	$(CC) $(CXXFLAGS) $< $(LOGGING)
 
 ./bin/layers/VkLayer% : ./lib/VkLayer%
 	cp $< $@
@@ -51,5 +49,6 @@ setup:
 	mkdir -p ./bin/layers
 
 clean:
+	rm -f ./include/*.gch
 	rm -R ./bin/*
 	mkdir -p ./bin/layers
