@@ -84,13 +84,13 @@ void Application::initLibs(){
 
     //Layer Logging
     std::vector<vk::LayerProperties> availableLayers = vk::enumerateInstanceLayerProperties();
-    std::vector<std::string> availableLayerNames = oz::map<vk::LayerProperties, std::string>(availableLayers, [](vk::LayerProperties l){return (std::string)l.layerName;});
+    std::vector<std::string> availableLayerNames = oz::map<vk::LayerProperties, std::string>(availableLayers, [](const vk::LayerProperties& l){return (std::string)l.layerName;});
     verifyRequired("Layer", availableLayerNames, requiredVkLayers);
     std::vector<const char*> finalLayers = oz::toCCPVec(requiredVkLayers);
 
     //Vulkan instance extensions
     std::vector<vk::ExtensionProperties> availableExtensions = vk::enumerateInstanceExtensionProperties();
-    std::vector<std::string> availableExtensionNames = oz::map<vk::ExtensionProperties, std::string>(availableExtensions, [](vk::ExtensionProperties l){return (std::string)l.extensionName;});
+    std::vector<std::string> availableExtensionNames = oz::map<vk::ExtensionProperties, std::string>(availableExtensions, [](const vk::ExtensionProperties& l){return (std::string)l.extensionName;});
     std::span<const char*> glfwExtensions = vkfw::getRequiredInstanceExtensions();
     for(const char* extension : glfwExtensions)
         requiredVkInstanceExtensions.push_back(extension);
