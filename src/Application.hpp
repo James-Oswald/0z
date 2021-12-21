@@ -68,8 +68,13 @@ class Application{
         vk::Queue graphicsQueue;
         vk::SurfaceKHR surface;
         vk::SurfaceFormatKHR surfaceFormat;
+
+        //Swapchain
+        vk::SwapchainKHR swapchain;
         vk::PresentModeKHR presentMode;
         vk::Extent2D swapExtent;
+        std::vector<vk::Image> swapchainImages;
+        std::vector<vk::ImageView> swapchainImageViews;
     
     public:
         Application(const std::string& configFilePath);

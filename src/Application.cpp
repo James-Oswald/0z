@@ -51,7 +51,7 @@ std::vector<T> Application::getVecProp(const boost::property_tree::ptree& pt, co
 void Application::verifyRequired(std::string name, std::vector<std::string> available, std::vector<std::string> requested){
     logger([&name, &available, &requested](auto concat){
         concat(oz::vecToTree("Available "+name+"s" , available));
-        concat(oz::vecToTree("Requested "+name+"s" , available));
+        concat(oz::vecToTree("Requested "+name+"s" , requested));
     });
     for(const std::string& r : requested){
         bool found = false;
@@ -150,7 +150,7 @@ void Application::initLibs(){
 }
 
 void Application::selectPhysicalDevice(){
-    //Physical Device Selection
+    logger(Logger::Level::Info, "Selecting Physical Device");
     std::vector<vk::PhysicalDevice> allPhysicalDevices = instance.enumeratePhysicalDevices(); //All available graphics hardware
     if (allPhysicalDevices.size()==0) 
         throw std::runtime_error("Failed to find GPUs with Vulkan support!");
@@ -211,10 +211,11 @@ void Application::selectPhysicalDevice(){
     });
     //select first usable phsyical device
     physicalDeviceInfo = physicalDevices[0];
+    logger(Logger::Level::Success, "Selected physical device: " + (std::string)physicalDeviceInfo.physicalDevice.getProperties().deviceName);
 }
 
 void Application::createLogicalDevice(){
-    //Create a logical device
+    logger(Logger::Level::Info, "Creating logical device and graphics queue");
     std::vector<const char*> finalLayers = oz::toCCPVec(requiredVkLayers);
     std::vector<const char*> finalDeviceExtenstions = oz::toCCPVec(requiredVkDeviceExtensions);
     vk::DeviceQueueCreateInfo queueCreateInfo;
@@ -232,9 +233,11 @@ void Application::createLogicalDevice(){
     deviceCreateInfo.ppEnabledLayerNames = finalLayers.data();
     logicalDevice = physicalDeviceInfo.physicalDevice.createDevice(deviceCreateInfo);
     graphicsQueue = logicalDevice.getQueue(physicalDeviceInfo.queueFamilyInfo.graphicsFamily.value(), 0);
+    logger(Logger::Level::Success, "Logical device and graphics queue created");
 }
 
 void Application::createSwapChain(){
+    logger(Logger::Level::Info ,"Creating swapchain");
     surfaceFormat = physicalDeviceInfo.swapChainInfo.formats[0];       //default format
     for(const auto& format : physicalDeviceInfo.swapChainInfo.formats) //find prefered format
         if(format.format == vk::Format::eB8G8R8A8Srgb && format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear){
@@ -282,6 +285,31 @@ void Application::createSwapChain(){
         creationInfo.queueFamilyIndexCount = 2;
         creationInfo.pQueueFamilyIndices = queueFamilyIndices;
     }
+    creationInfo.preTransform = physicalDeviceInfo.swapChainInfo.capabilities.currentTransform;
+    creationInfo.compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque;
+    creationInfo.presentMode = presentMode;
+    creationInfo.clipped = VK_TRUE;
+    creationInfo.oldSwapchain = VK_NULL_HANDLE;
+    swapchain = logicalDevice.createSwapchainKHR(creationInfo);
+    //Swapchain images and image views
+    swapchainImages = logicalDevice.getSwapchainImagesKHR(swapchain);
+    for (const vk::Image& swapchainImage : swapchainImages){
+        vk::ImageViewCreateInfo imageViewCreationInfo;
+        imageViewCreationInfo.viewType = vk::ImageViewType::e2D;
+        imageViewCreationInfo.image = swapchainImage;
+        imageViewCreationInfo.format = surfaceFormat.format;
+        imageViewCreationInfo.components.r = vk::ComponentSwizzle::eIdentity;
+        imageViewCreationInfo.components.g = vk::ComponentSwizzle::eIdentity;
+        imageViewCreationInfo.components.b = vk::ComponentSwizzle::eIdentity;
+        imageViewCreationInfo.components.a = vk::ComponentSwizzle::eIdentity;
+        imageViewCreationInfo.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
+        imageViewCreationInfo.subresourceRange.baseMipLevel = 0;
+        imageViewCreationInfo.subresourceRange.levelCount = 1;
+        imageViewCreationInfo.subresourceRange.baseArrayLayer = 0;
+        imageViewCreationInfo.subresourceRange.layerCount = 1;
+        swapchainImageViews.push_back(logicalDevice.createImageView(imageViewCreationInfo));
+    }
+    logger(Logger::Level::Success, "Swapchain created");
 }
 
 Application::Application(const std::string& configFilePath_ = "config.json")
@@ -295,6 +323,9 @@ Application::Application(const std::string& configFilePath_ = "config.json")
 }
 
 Application::~Application(){
+    for(const vk::ImageView& swapchainImageView : swapchainImageViews)
+        logicalDevice.destroyImageView(swapchainImageView);
+    logicalDevice.destroySwapchainKHR(swapchain);
     logicalDevice.destroy();
     instance.destroySurfaceKHR(surface);
     if(debug)
