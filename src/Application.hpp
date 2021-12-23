@@ -39,6 +39,7 @@ class Application{
         void selectPhysicalDevice();
         void createLogicalDevice();
         void createSwapChain();
+        void createGraphicsPipeline();
     protected:
         struct QueueFamilyInfo{
             float graphicsFamilyPriority = 1;
@@ -66,15 +67,16 @@ class Application{
         PhysicalDeviceInfo physicalDeviceInfo;           //A the selected physical device this app is running on.
         vk::Device logicalDevice; 
         vk::Queue graphicsQueue;
-        vk::SurfaceKHR surface;
+        vk::SurfaceKHR surface; 
         vk::SurfaceFormatKHR surfaceFormat;
 
         //Swapchain
-        vk::SwapchainKHR swapchain;
+        vk::SwapchainKHR swapchain; 
         vk::PresentModeKHR presentMode;
         vk::Extent2D swapExtent;
-        std::vector<vk::Image> swapchainImages;
-        std::vector<vk::ImageView> swapchainImageViews;
+        std::vector<vk::Image> swapchainImages; //vk::images are handles to images in the swapchain 
+        std::vector<vk::ImageView> swapchainImageViews; //handles to into the images + metadata, what we actually write to.
+        //std::vector<vk::Framebuffer> swapchainFrameBuffers; 
     
     public:
         Application(const std::string& configFilePath);

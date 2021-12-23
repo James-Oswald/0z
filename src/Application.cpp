@@ -69,6 +69,7 @@ void Application::verifyRequired(std::string name, std::vector<std::string> avai
 }
 
 void Application::configure(){
+
     boost::filesystem::path programLocation = boost::dll::program_location().parent_path();
     boost::filesystem::current_path(programLocation);
     boost::property_tree::read_json(configFilePath, staticConfigTree);
@@ -150,7 +151,7 @@ void Application::initLibs(){
 }
 
 void Application::selectPhysicalDevice(){
-    logger(Logger::Level::Info, "Selecting Physical Device");
+    logger(Logger::Level::Starting, "Selecting Physical Device");
     std::vector<vk::PhysicalDevice> allPhysicalDevices = instance.enumeratePhysicalDevices(); //All available graphics hardware
     if (allPhysicalDevices.size()==0) 
         throw std::runtime_error("Failed to find GPUs with Vulkan support!");
@@ -215,7 +216,7 @@ void Application::selectPhysicalDevice(){
 }
 
 void Application::createLogicalDevice(){
-    logger(Logger::Level::Info, "Creating logical device and graphics queue");
+    logger(Logger::Level::Starting, "Creating logical device and graphics queue");
     std::vector<const char*> finalLayers = oz::toCCPVec(requiredVkLayers);
     std::vector<const char*> finalDeviceExtenstions = oz::toCCPVec(requiredVkDeviceExtensions);
     vk::DeviceQueueCreateInfo queueCreateInfo;
@@ -237,7 +238,7 @@ void Application::createLogicalDevice(){
 }
 
 void Application::createSwapChain(){
-    logger(Logger::Level::Info ,"Creating swapchain");
+    logger(Logger::Level::Starting ,"Creating swapchain");
     surfaceFormat = physicalDeviceInfo.swapChainInfo.formats[0];       //default format
     for(const auto& format : physicalDeviceInfo.swapChainInfo.formats) //find prefered format
         if(format.format == vk::Format::eB8G8R8A8Srgb && format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear){
@@ -274,12 +275,12 @@ void Application::createSwapChain(){
     creationInfo.imageUsage = vk::ImageUsageFlagBits::eColorAttachment; //Render directly to images in swap chain, no post processing
     QueueFamilyInfo& queueFamInf = physicalDeviceInfo.queueFamilyInfo;
     if(queueFamInf.presentationFamily == queueFamInf.graphicsFamily){
-        logger(Logger::Level::Success, "Using image sharing exclusive mode (The good one)");
+        logger(Logger::Level::Info, "Using image sharing exclusive mode (The good one)");
         creationInfo.imageSharingMode = vk::SharingMode::eExclusive; //The better one
         creationInfo.queueFamilyIndexCount = 0;
         creationInfo.pQueueFamilyIndices = nullptr;
     }else{
-        logger(Logger::Level::Warning, "Using image sharing shared mode (The slow one)");
+        logger(Logger::Level::Info, "Using image sharing shared mode (The slow one)");
         uint32_t queueFamilyIndices[] = {queueFamInf.graphicsFamily.value(), queueFamInf.presentationFamily.value()};
         creationInfo.imageSharingMode = vk::SharingMode::eConcurrent;
         creationInfo.queueFamilyIndexCount = 2;
@@ -312,6 +313,10 @@ void Application::createSwapChain(){
     logger(Logger::Level::Success, "Swapchain created");
 }
 
+void Application::createGraphicsPipeline(){
+
+}
+
 Application::Application(const std::string& configFilePath_ = "config.json")
 :configFilePath(configFilePath_)
 {
@@ -320,6 +325,7 @@ Application::Application(const std::string& configFilePath_ = "config.json")
     selectPhysicalDevice();
     createLogicalDevice();
     createSwapChain();
+    createGraphicsPipeline();
 }
 
 Application::~Application(){
